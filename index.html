@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dialed In — The Open · World Marketing Summit AI Power Session</title>
+<meta name="description" content="An interactive, gamified AI training for TaylorMade's global marketing team — a round of golf in seven stations.">
+<style>
+/* ============================================================
+   DIALED IN — THE OPEN · TaylorMade Global Marketing AI Session
+   Brand: Black/White, TM Red #E2001A accent only, DIN Next type.
+   A "round of golf" — Tee · Range · Course · Scramble · 19th.
+   Self-contained: all CSS/JS inline; images in ./assets/
+   ============================================================ */
+:root{
+  --black:#000; --bg:#141414; --bg2:#1A1A1A; --panel:#202020; --card:#1E1E1E;
+  --card-2:#242424; --line:#333333; --line-2:#3C3C3C;
+  --red:#E2001A; --red-d:#B30015;
+  --ink:#F2F2F2; --white:#FFFFFF; --muted:#9A9A9A; --dim:#6F6F6F; --dim-2:#525252;
+  --g4:#404040; --g7:#737373; --gA:#A6A6A6; --gD:#D9D9D9;
+  --din:"DIN Next 79","DIN Next LT Pro","DIN Next","DIN Alternate","Bahnschrift","Arial Narrow",Helvetica,Arial,sans-serif;
+  --mono:"Courier New",ui-monospace,Menlo,Consolas,monospace;
+  --maxw:1180px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--din);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow:hidden; letter-spacing:.01em;
+}
+a{color:inherit}
+::selection{background:var(--red); color:#fff}
+
+/* ---------- STAGE / NODES ---------- */
+#stage{position:fixed; inset:0; overflow:hidden}
+.node{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  justify-content:safe center; align-items:stretch;
+  padding:74px clamp(24px,4vw,64px) 62px;
+  opacity:0; visibility:hidden; transform:translateY(14px) scale(.992);
+  transition:opacity .5s var(--ease), transform .6s var(--ease);
+  overflow-y:auto; overflow-x:hidden;
+}
+.node.active{opacity:1; visibility:visible; transform:none; z-index:2}
+.node.leaving{opacity:0; transform:translateY(-10px) scale(.994); z-index:1}
+.wrap{width:100%; max-width:var(--maxw); margin:0 auto; position:relative; z-index:1}
+.watermark{position:absolute; right:-3%; bottom:-2%; height:min(72vh,640px); width:auto; opacity:.055; z-index:0; pointer-events:none; user-select:none}
+.node--photo .wrap{z-index:3}
+#BOARD{display:block; padding:58px 22px 52px}
+.boardframe{display:block; width:100%; height:100%; border:0; border-radius:8px; background:#141414; box-shadow:0 0 0 1px var(--line)}
+
+/* photo backplate */
+.bg{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center; opacity:0; transform:scale(1.06); transition:opacity 1.1s var(--ease), transform 8s linear}
+.node.active .bg{opacity:1; transform:scale(1.0)}
+.bg::after{content:""; position:absolute; inset:0}
+.ov-60::after{background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.66))}
+.ov-72::after{background:linear-gradient(110deg,rgba(0,0,0,.82),rgba(0,0,0,.62))}
+.ov-86::after{background:linear-gradient(180deg,rgba(0,0,0,.8),rgba(0,0,0,.9))}
+.ov-side::after{background:linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.72) 42%,rgba(0,0,0,.42) 100%)}
+.ov-prod::after{background:linear-gradient(180deg,rgba(10,10,10,.94) 0%,rgba(10,10,10,.74) 38%,rgba(10,10,10,.82) 100%)}
+
+/* ---------- TYPE ---------- */
+.kicker{font-size:12px; font-weight:700; letter-spacing:.34em; text-transform:uppercase; color:var(--gA)}
+.kicker .sep{color:var(--red); margin:0 .5em}
+.redbar{display:inline-block; height:11px; width:54px; background:var(--red); margin-bottom:22px}
+h1.title{font-weight:800; text-transform:uppercase; line-height:.92; letter-spacing:.005em; font-size:clamp(58px,11.5vw,150px)}
+h1.title .ln2{color:var(--red)}
+h2.h{font-weight:800; text-transform:uppercase; line-height:1.0; letter-spacing:.02em; font-size:clamp(30px,4.6vw,58px)}
+h3.sub{font-weight:700; text-transform:uppercase; letter-spacing:.12em; font-size:clamp(15px,1.5vw,19px); color:var(--white)}
+.lead{font-size:clamp(15px,1.55vw,19px); line-height:1.5; color:var(--gD); font-weight:400; max-width:60ch}
+.lead-lg{font-size:clamp(17px,1.9vw,23px); line-height:1.45; color:var(--gD); max-width:64ch}
+.eyebrow{font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:var(--red); display:flex; align-items:center; gap:12px; margin-bottom:18px}
+.eyebrow::before{content:""; width:26px; height:2px; background:var(--red); display:inline-block}
+.secno{font-family:var(--din); font-weight:800; color:var(--red); font-size:clamp(64px,12vw,150px); line-height:.8; letter-spacing:-.02em}
+small.note{display:block; font-size:13px; color:var(--dim); line-height:1.5; margin-top:14px; max-width:64ch}
+.hl{color:var(--white); font-weight:700}
+.hl-r{color:var(--red); font-weight:700}
+
+/* ---------- CHROME: header / footer ---------- */
+.chrome{position:fixed; z-index:40; pointer-events:none}
+#topbar{top:0; left:0; right:0; height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 clamp(20px,3.4vw,46px)}
+#topbar::before{content:""; position:absolute; left:0; right:0; top:0; height:140px; background:linear-gradient(180deg,#0F0F0F 0%,rgba(13,13,13,.85) 40%,rgba(13,13,13,0) 100%); z-index:-1; pointer-events:none}
+#wordmark{height:21px; opacity:.92; cursor:pointer; pointer-events:auto; transition:opacity .25s}
+#wordmark:hover{opacity:1}
+.topright{display:flex; align-items:center; gap:12px; pointer-events:auto}
+#brandrail{display:flex; gap:8px}
+.rail-dot{display:flex; align-items:center; gap:7px; height:30px; padding:0 11px 0 9px; border:1px solid var(--line); border-radius:2px; background:rgba(20,20,20,.55); backdrop-filter:blur(4px); cursor:pointer; transition:.25s var(--ease)}
+.rail-dot svg{width:15px; height:15px; stroke:var(--gA); fill:none; stroke-width:1.7; transition:.25s}
+.rail-dot .rl{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.rail-dot:hover{border-color:var(--g7)}
+.rail-dot.cur{border-color:var(--red); background:rgba(226,0,26,.1)}
+.rail-dot.cur svg{stroke:var(--red)} .rail-dot.cur .rl{color:#fff}
+.rail-dot.done svg{stroke:var(--g7)} .rail-dot.done .rl{color:var(--dim)}
+.rail-dot.done::after{content:"✓"; color:var(--red); font-size:9px; margin-left:1px}
+.scorebtn{display:flex; align-items:center; gap:7px; height:30px; padding:0 13px; border:1px solid var(--red); border-radius:2px; background:rgba(226,0,26,.12); color:#fff; font-family:var(--din); font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; pointer-events:auto; transition:.22s}
+.scorebtn:hover{background:var(--red)}
+.scorebtn .lead-team{color:var(--red); margin-left:3px}
+.scorebtn:hover .lead-team{color:#fff}
+
+#botbar{bottom:0; left:0; right:0; height:50px; display:flex; align-items:center; justify-content:space-between; padding:0 clamp(20px,3.4vw,46px); border-top:1px solid rgba(255,255,255,.06)}
+#botbar::before{content:""; position:absolute; left:0; top:-1px; width:150px; height:2px; background:var(--red); z-index:1}
+#botbar::after{content:""; position:absolute; left:0; right:0; bottom:0; height:125px; background:linear-gradient(0deg,#0F0F0F 0%,rgba(13,13,13,.85) 44%,rgba(13,13,13,0) 100%); z-index:-1; pointer-events:none}
+#foot{font-size:10px; letter-spacing:.22em; color:var(--dim); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#nav{display:flex; align-items:center; gap:8px; pointer-events:auto}
+.ctl{display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 13px; background:transparent; border:1px solid var(--line); color:var(--gA); font-family:var(--din); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:.2s}
+.ctl:hover{border-color:var(--red); color:#fff}
+.ctl:disabled{opacity:.32; cursor:default; border-color:var(--line); color:var(--dim)}
+.ctl-home{border-color:rgba(226,0,26,.5); color:var(--gD)}
+.crumbs{display:flex; gap:6px; align-items:center; margin-right:4px}
+.crumbs i{width:7px; height:7px; border-radius:50%; background:var(--dim-2); display:block; transition:.3s}
+.crumbs i.on{background:var(--red); box-shadow:0 0 0 3px rgba(226,0,26,.18)}
+.crumbs i.seen{background:var(--g7)}
+
+/* ---------- CHOICE CARDS ---------- */
+.choices{display:grid; gap:16px; margin-top:30px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)} .g6{grid-template-columns:repeat(3,1fr)}
+.choice{position:relative; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:3px; padding:22px 22px 20px; cursor:pointer; color:var(--ink); font-family:var(--din); transition:.28s var(--ease); overflow:hidden; display:flex; flex-direction:column; gap:9px}
+.choice::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--red); transform:scaleY(0); transform-origin:top; transition:transform .3s var(--ease)}
+.choice:hover,.choice:focus-visible{border-color:var(--red); background:var(--card-2); transform:translateY(-3px); outline:none}
+.choice:hover::before,.choice:focus-visible::before{transform:scaleY(1)}
+.choice .num{position:absolute; top:16px; right:16px; width:26px; height:26px; border:1px solid var(--line-2); color:var(--muted); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; transition:.28s}
+.choice:hover .num,.choice:focus-visible .num{background:var(--red); border-color:var(--red); color:#fff}
+.choice .ci{width:30px; height:30px; stroke:var(--white); fill:none; stroke-width:1.6}
+.choice h4{font-size:clamp(15px,1.45vw,18px); font-weight:700; text-transform:uppercase; letter-spacing:.04em; line-height:1.12; padding-right:30px}
+.choice p{font-size:13.5px; line-height:1.45; color:var(--muted)}
+.choice .tag{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); font-weight:700}
+.choice.visited{opacity:.62}
+.choice.mini{padding:16px 18px}
+.choice.mini h4{font-size:14.5px; padding-right:24px}
+
+/* simple text nav buttons */
+.btnrow{display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; align-items:center}
+.lnk{background:none; border:none; color:var(--gA); font-family:var(--din); font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; padding:8px 2px; border-bottom:1px solid transparent; transition:.2s}
+.lnk:hover{color:#fff; border-color:var(--red)}
+.lnk.back::before{content:"◀  "; color:var(--red)}
+.btn-primary{display:inline-flex; align-items:center; gap:12px; background:var(--red); color:#fff; border:none; font-family:var(--din); font-weight:800; letter-spacing:.14em; text-transform:uppercase; font-size:15px; padding:16px 30px; border-radius:2px; cursor:pointer; transition:.25s var(--ease)}
+.btn-primary:hover{background:#fff; color:#000; transform:translateY(-2px)}
+.btn-primary .ar{transition:transform .25s} .btn-primary:hover .ar{transform:translateX(4px)}
+.btn-ghost{display:inline-flex; align-items:center; gap:10px; background:transparent; border:1px solid var(--line-2); color:var(--ink); font-family:var(--din); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:13px; padding:14px 24px; border-radius:2px; cursor:pointer; transition:.25s}
+.btn-ghost:hover{border-color:var(--red); color:#fff}
+
+/* ---------- TITLE NODE ---------- */
+#T .wrap{max-width:1100px}
+.t-metal{height:clamp(74px,11vw,128px); width:auto; margin-bottom:30px; filter:drop-shadow(0 6px 30px rgba(0,0,0,.6)); opacity:0; transform:translateY(10px); animation:rise .9s var(--ease) .25s forwards}
+@keyframes rise{to{opacity:1; transform:none}}
+.t-foot{margin-top:38px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.t-credit{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gA)}
+.t-credit b{color:#fff; font-weight:700}
+
+/* ---------- CARD GRID ---------- */
+.cards{display:grid; gap:16px; margin-top:26px}
+.card-i{position:relative; background:var(--card); border:1px solid var(--line); border-radius:3px; padding:22px; transition:.28s var(--ease); overflow:hidden}
+.card-i:hover{border-color:var(--line-2); transform:translateY(-3px)}
+.card-i .tier{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); font-weight:700; margin-bottom:9px}
+.card-i h4{font-size:clamp(17px,1.8vw,22px); font-weight:800; text-transform:uppercase; letter-spacing:.02em; margin-bottom:4px}
+.card-i .meta{font-size:11px; color:var(--dim); font-family:var(--mono); margin-bottom:11px}
+.card-i p{font-size:13.5px; line-height:1.5; color:var(--muted)}
+.card-i .reveal{max-height:0; opacity:0; overflow:hidden; transition:.4s var(--ease); font-size:13px; color:var(--gD); line-height:1.5}
+.card-i:hover .reveal{max-height:160px; opacity:1; margin-top:10px}
+
+/* comparison / decision strip */
+.strip{margin-top:22px; background:var(--bg2); border:1px solid var(--line); border-left:3px solid var(--red); border-radius:3px; padding:18px 22px}
+.strip .st{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); font-weight:700; margin-bottom:7px}
+.strip p{font-size:13.5px; line-height:1.55; color:var(--gD)} .strip p+p{margin-top:8px}
+
+/* ---------- PROMPT / DEMO BLOCKS ---------- */
+.prompt{position:relative; background:#1b1b1b; border:1px solid var(--line); border-left:3px solid var(--red); border-radius:3px; padding:18px 20px; font-family:var(--mono); font-size:13.5px; line-height:1.6; color:#e8e8e8; margin-top:16px}
+.prompt .pm{display:block; font-style:italic; color:var(--red); font-size:12px; margin-bottom:9px; font-family:var(--din); letter-spacing:.08em; text-transform:uppercase}
+.prompt .cite{color:#ff6a6a}
+.prompt .ptxt{display:block}
+.copybtn{position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:6px; height:28px; padding:0 11px; background:transparent; border:1px solid var(--line-2); color:var(--gA); font-family:var(--din); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:.2s}
+.copybtn:hover{border-color:var(--red); color:#fff}
+.copybtn.done{border-color:var(--red); color:#fff; background:rgba(226,0,26,.14)}
+.why{margin-top:20px} .why .st{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); font-weight:700; margin-bottom:8px}
+.why p{font-size:14px; line-height:1.6; color:var(--gD); max-width:74ch}
+
+/* ---------- SOURCES ---------- */
+.sources{margin-top:22px; border-top:1px solid var(--line); padding-top:14px}
+.sources .sh{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px}
+.sources .sh svg{width:13px;height:13px;stroke:var(--red);fill:none;stroke-width:1.8}
+.srcgrid{display:flex; flex-wrap:wrap; gap:8px}
+.src{display:inline-flex; align-items:center; gap:8px; font-size:11.5px; letter-spacing:.04em; color:var(--gA); text-decoration:none; border:1px solid var(--line); border-radius:2px; padding:7px 11px; transition:.2s; font-weight:600}
+.src:hover{border-color:var(--red); color:#fff; background:rgba(226,0,26,.06)}
+.src .dom{color:var(--dim); font-family:var(--mono); font-size:10px}
+
+/* pills */
+.pillrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+.pill{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gA); border:1px solid var(--line); border-radius:2px; padding:8px 12px; font-weight:700}
+.pill b{color:var(--red)}
+
+/* expandable function cards */
+.fn{cursor:pointer}
+.fn .reveal{max-height:0;opacity:0;overflow:hidden;transition:.45s var(--ease)}
+.fn.open .reveal{max-height:760px;opacity:1;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.fn .reveal p{font-size:13px;color:var(--gD);line-height:1.5}
+.fn .plus{position:absolute;top:18px;right:18px;color:var(--red);font-size:18px;font-weight:700;transition:.3s}
+.fn.open .plus{transform:rotate(45deg)}
+
+/* ===================== GOLF GAME COMPONENTS ===================== */
+/* PAR / RESULT tags on holes */
+.par{display:inline-block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; padding:4px 9px; border-radius:2px; background:rgba(115,115,115,.2); color:var(--gA)}
+.res{display:inline-block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; padding:4px 9px; border-radius:2px; background:var(--red); color:#fff}
+
+/* THE TEE — live poll */
+.poll{margin-top:24px; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:24px clamp(18px,3vw,32px)}
+.poll .pq{font-size:13px; letter-spacing:.06em; color:var(--gD); margin-bottom:16px}
+.poll .pq b{color:#fff}
+.poll-row{display:grid; grid-template-columns:140px 1fr 54px; gap:14px; align-items:center; margin-bottom:12px}
+.poll-row .pl{font-size:12px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--gA)}
+.poll-bar{height:24px; background:var(--line); border-radius:2px; overflow:hidden; cursor:pointer; position:relative}
+.poll-fill{height:100%; width:0; background:linear-gradient(90deg,var(--red-d),var(--red)); transition:width .5s var(--ease)}
+.poll-row .pv{font-size:15px; font-weight:800; color:#fff; text-align:right; font-variant-numeric:tabular-nums}
+.poll .phint{font-size:11.5px; color:var(--dim); margin-top:6px; letter-spacing:.04em}
+.poll-ctrls{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+.tally-btn{display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 12px; background:transparent; border:1px solid var(--line-2); color:var(--gA); font-family:var(--din); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:.2s}
+.tally-btn:hover{border-color:var(--red); color:#fff}
+
+/* THE RANGE — driving-range distance meter */
+.range{margin-top:24px; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:28px clamp(18px,3vw,36px) 30px}
+.range-top{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:8px}
+.range-dist{font-size:clamp(40px,7vw,84px); font-weight:800; line-height:.85; color:#fff; font-variant-numeric:tabular-nums}
+.range-dist .yd{font-size:.3em; color:var(--red); letter-spacing:.2em; margin-left:6px; vertical-align:super}
+.range-verdict{font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--red); text-align:right; max-width:30ch}
+.fairway{position:relative; height:30px; margin:20px 0 6px; border-radius:16px; background:repeating-linear-gradient(90deg,#222 0 18px,#1c1c1c 18px 36px); border:1px solid var(--line); overflow:hidden}
+.fairway .pin{position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:16px; opacity:.7}
+.fairway .ball{position:absolute; left:2%; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px rgba(226,0,26,.25),0 2px 6px rgba(0,0,0,.6); transition:left .55s var(--ease)}
+.fairway .yds{position:absolute; bottom:-1px; left:0; font-size:9px; color:var(--dim); font-family:var(--mono)}
+.clubs{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:22px}
+.club{position:relative; text-align:left; background:var(--bg2); border:1px solid var(--line); border-radius:3px; padding:14px 14px 13px; cursor:pointer; transition:.25s var(--ease)}
+.club:hover{border-color:var(--g7)}
+.club.on{border-color:var(--red); background:rgba(226,0,26,.08)}
+.club .ck{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:var(--red); margin-bottom:5px}
+.club .cn{font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; color:var(--gD); line-height:1.1}
+.club .cy{position:absolute; top:12px; right:12px; font-size:11px; font-weight:800; color:var(--dim); font-variant-numeric:tabular-nums}
+.club.on .cy{color:var(--red)}
+.club .tick{position:absolute; top:11px; right:12px; width:16px; height:16px; border-radius:50%; border:1px solid var(--line-2); display:none}
+.builtprompt{margin-top:20px; background:#1b1b1b; border:1px solid var(--line); border-left:3px solid var(--red); border-radius:3px; padding:16px 18px; font-family:var(--mono); font-size:13px; line-height:1.65; color:#e8e8e8; min-height:54px}
+.builtprompt .bp-lab{display:block; font-style:italic; color:var(--red); font-size:11px; margin-bottom:8px; font-family:var(--din); letter-spacing:.08em; text-transform:uppercase}
+.builtprompt em{color:#777; font-style:normal}
+.builtprompt b{color:#fff; font-weight:400}
+
+/* PRO vs AM toggle */
+.vs{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px}
+.swing{background:var(--card); border:1px solid var(--line); border-radius:3px; padding:18px 20px}
+.swing.am{border-top:3px solid var(--g4)} .swing.pro{border-top:3px solid var(--red)}
+.swing .sw-l{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; margin-bottom:10px}
+.swing.am .sw-l{color:var(--gA)} .swing.pro .sw-l{color:var(--red)}
+.swing .sw-p{font-family:var(--mono); font-size:12.5px; line-height:1.55; color:#cfcfcf; background:#181818; border:1px solid var(--line); border-radius:2px; padding:11px 13px; margin-bottom:11px}
+.swing .sw-o{font-size:12.5px; line-height:1.5; color:var(--muted)} .swing .sw-o b{color:#fff;font-weight:700}
+
+/* PRE-SHOT ROUTINE steps */
+.psr{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:24px}
+.psr-step{position:relative; background:var(--card); border:1px solid var(--line); border-top:3px solid var(--red); border-radius:3px; padding:20px 18px 18px}
+.psr-step .sn{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--red); font-weight:800; margin-bottom:8px}
+.psr-step h4{font-size:18px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; margin-bottom:7px; line-height:1.05}
+.psr-step .gloss{font-size:11.5px; color:var(--dim); font-style:italic; margin-bottom:9px}
+.psr-step p{font-size:13px; color:var(--muted); line-height:1.5}
+
+/* weeks / roadmap */
+.weeks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
+.week{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--red);border-radius:3px;padding:18px}
+.week .wk{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:800;margin-bottom:6px}
+.week h4{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;line-height:1.1}
+.week p{font-size:12.5px;color:var(--muted);line-height:1.45}
+
+/* two-col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+.col h4{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);font-weight:800;margin-bottom:12px}
+.col ul{list-style:none} .col li{font-size:13.5px;line-height:1.5;color:var(--gD);padding-left:18px;position:relative;margin-bottom:9px}
+.col li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:1px;background:var(--red)}
+
+/* LOCAL RULES (approved tools) */
+.localrules{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px}
+.lr{background:var(--card); border:1px solid var(--line); border-radius:4px; padding:22px 24px}
+.lr.ok{border-left:3px solid var(--red)} .lr.no{border-left:3px solid var(--g4)}
+.lr .lr-h{font-size:12px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:9px}
+.lr.ok .lr-h{color:var(--red)} .lr.no .lr-h{color:var(--gA)}
+.lr-list{display:flex; flex-direction:column; gap:9px}
+.lr-item{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--gD); font-weight:600}
+.lr-item .mk{width:18px; height:18px; flex:0 0 18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800}
+.lr.ok .mk{background:var(--red); color:#fff} .lr.no .mk{background:var(--g4); color:#111}
+
+/* close node */
+#CLOSE .wrap{text-align:center; max-width:900px}
+.z-metal{height:clamp(70px,9vw,110px);margin:0 auto 26px;display:block;filter:drop-shadow(0 6px 30px rgba(0,0,0,.6))}
+.z-tag{font-size:clamp(34px,6vw,68px);font-weight:800;text-transform:uppercase;letter-spacing:.06em;line-height:.95}
+.z-rule{width:64px;height:4px;background:var(--red);margin:22px auto}
+.z-sub{font-size:clamp(15px,1.7vw,20px);color:var(--gD);line-height:1.5;max-width:62ch;margin:0 auto}
+.z-credit{margin-top:30px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* ===================== LEADERBOARD OVERLAY ===================== */
+#lbWrap{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.66); backdrop-filter:blur(3px); padding:24px}
+#lbWrap.show{display:flex}
+#lbPanel{width:min(560px,96vw); max-height:90vh; overflow-y:auto; background:#161616; border:1px solid var(--line-2); border-top:4px solid var(--red); border-radius:5px; padding:26px clamp(18px,3vw,30px) 24px; box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.lb-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+.lb-title{font-size:20px; font-weight:800; text-transform:uppercase; letter-spacing:.04em}
+.lb-title .fl{color:var(--red); margin-right:8px}
+.lb-x{background:none; border:1px solid var(--line); color:var(--gA); width:30px; height:30px; border-radius:2px; cursor:pointer; font-size:14px; transition:.2s}
+.lb-x:hover{border-color:var(--red); color:#fff}
+.lb-sub{font-size:11px; color:var(--dim); letter-spacing:.04em; margin-bottom:18px}
+.lb-rows{display:flex; flex-direction:column; gap:7px; margin-bottom:18px}
+.lb-row{display:grid; grid-template-columns:30px 1fr auto; gap:12px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:3px; padding:11px 14px; cursor:pointer; transition:.2s}
+.lb-row:hover{border-color:var(--g7)}
+.lb-row.sel{border-color:var(--red); background:rgba(226,0,26,.08)}
+.lb-row .pos{font-size:13px; font-weight:800; color:var(--dim); text-align:center; font-variant-numeric:tabular-nums}
+.lb-row.lead .pos{color:var(--red)}
+.lb-row .team{font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#fff; outline:none}
+.lb-row .team:focus{border-bottom:1px dashed var(--red)}
+.lb-row .scoreline{display:flex; align-items:center; gap:10px}
+.lb-row .thru{font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim)}
+.lb-row .score{font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; min-width:46px; text-align:right}
+.score.under{color:var(--red)} .score.even{color:var(--gD)} .score.over{color:#fff}
+.lb-row .fl{color:var(--red); font-size:13px}
+.lb-award{border-top:1px solid var(--line); padding-top:15px}
+.lb-award .aw-t{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:700; margin-bottom:10px}
+.lb-award .aw-t b{color:#fff}
+.awd-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.awd{display:flex; flex-direction:column; gap:2px; text-align:left; background:var(--bg2); border:1px solid var(--line); border-left:3px solid var(--red); border-radius:2px; padding:9px 12px; cursor:pointer; transition:.2s; font-family:var(--din)}
+.awd:hover{background:rgba(226,0,26,.1); border-color:var(--red)}
+.awd:disabled{opacity:.4; cursor:default}
+.awd .an{font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:#fff}
+.awd .ad{font-size:10.5px; color:var(--muted); line-height:1.25}
+.awd .av{font-size:11px; font-weight:800; color:var(--red)}
+.awd.pen{border-left-color:var(--g4)} .awd.pen .an,.awd.pen .av{color:var(--gA)}
+.lb-foot{display:flex; gap:9px; margin-top:15px; flex-wrap:wrap}
+.lb-mini{background:none; border:1px solid var(--line); color:var(--gA); font-family:var(--din); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 12px; border-radius:2px; cursor:pointer; transition:.2s}
+.lb-mini:hover{border-color:var(--red); color:#fff}
+.lb-note{font-size:10.5px; color:var(--dim); margin-top:12px; line-height:1.45}
+
+/* big board embedded in 19th hole */
+.bigboard{margin-top:8px; background:var(--card); border:1px solid var(--line); border-top:3px solid var(--red); border-radius:4px; padding:18px clamp(14px,2.4vw,26px) 16px}
+.bigboard .bb-row{display:grid; grid-template-columns:34px 1fr auto; gap:14px; align-items:center; padding:11px 6px; border-bottom:1px solid var(--line)}
+.bigboard .bb-row:last-child{border-bottom:none}
+.bigboard .bb-pos{font-size:15px; font-weight:800; color:var(--dim); text-align:center}
+.bigboard .bb-row.lead .bb-pos{color:var(--red)}
+.bigboard .bb-team{font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#fff}
+.bigboard .bb-score{font-size:22px; font-weight:800; font-variant-numeric:tabular-nums}
+
+/* ---------- MODELS / EFFORT DIAL ---------- */
+.dialwrap{margin-top:24px; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:28px clamp(20px,3vw,38px) 32px}
+.dial-top{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:22px}
+.dial-level{font-size:clamp(32px,5vw,56px); font-weight:800; text-transform:uppercase; line-height:.9}
+.dial-level .api{font-size:13px; color:var(--red); letter-spacing:.2em; display:block; margin-top:8px}
+.dial-use{font-size:14px; color:var(--gD); line-height:1.45; max-width:42ch; min-height:60px}
+.track{position:relative; height:54px; margin:8px 4px 0}
+.track-line{position:absolute; top:50%; left:0; right:0; height:4px; background:var(--line-2); border-radius:3px; transform:translateY(-50%)}
+.track-fill{position:absolute; top:50%; left:0; height:4px; background:var(--red); border-radius:3px; transform:translateY(-50%); transition:width .35s var(--ease)}
+.stop{position:absolute; top:50%; transform:translate(-50%,-50%); cursor:pointer; display:flex; flex-direction:column; align-items:center}
+.stop .knob{width:15px; height:15px; border-radius:50%; background:var(--bg2); border:2px solid var(--g7); transition:.25s var(--ease); position:relative; z-index:2}
+.stop:hover .knob{border-color:#fff}
+.stop.on .knob{background:var(--red); border-color:var(--red); width:21px; height:21px; box-shadow:0 0 0 6px rgba(226,0,26,.18)}
+.stop.lit .knob{border-color:var(--red)}
+.stop .lab{position:absolute; top:24px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); font-weight:700; white-space:nowrap; transition:.25s}
+.stop:hover .lab{color:var(--gA)} .stop.on .lab{color:#fff}
+.stop .deflab{position:absolute; top:-26px; font-size:9px; letter-spacing:.14em; color:var(--red); font-weight:700; text-transform:uppercase; opacity:0; white-space:nowrap}
+.stop.isdef .deflab{opacity:1}
+.dial-bars{display:grid; grid-template-columns:1fr 1fr; gap:18px 30px; margin-top:42px}
+.meter .ml{display:flex; justify-content:space-between; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:7px}
+.meter .mt{height:7px; background:var(--line); border-radius:4px; overflow:hidden}
+.meter .mf{height:100%; border-radius:4px; transition:width .4s var(--ease)}
+.mf.cap{background:linear-gradient(90deg,#777,#fff)}
+.mf.cost{background:linear-gradient(90deg,#7a0010,var(--red))}
+.dial-hint{font-size:12px; color:var(--dim); margin-top:18px} .dial-hint b{color:var(--gA)}
+
+/* ---------- AGENDA ---------- */
+.agenda{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.ag-row{display:grid;grid-template-columns:74px 1fr;gap:18px;align-items:start;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:3px;padding:13px 18px;transition:.25s var(--ease);cursor:pointer}
+.ag-row:hover{border-color:var(--red);transform:translateX(4px)}
+.ag-t{font-size:12px;font-weight:800;color:var(--red);letter-spacing:.05em;font-variant-numeric:tabular-nums;padding-top:3px}
+.ag-row h4{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+.ag-row h4 .ag-plain{color:var(--gA);font-weight:700;font-size:10.5px;letter-spacing:.12em;margin-left:8px}
+.ag-p{font-size:12.5px;color:var(--muted);line-height:1.4}
+
+/* ---------- TOOL MATRIX ---------- */
+.toolrow{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:3px;padding:13px 18px;margin-bottom:10px;transition:.25s var(--ease)}
+.toolrow:hover{border-color:var(--line-2)}
+.toolrow .tn{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#fff}
+.toolrow .tn span{display:block;font-size:10px;color:var(--red);letter-spacing:.13em;margin-top:3px}
+.toolrow .tu{font-size:13px;color:var(--muted);line-height:1.45}
+@media(max-width:600px){.dial-bars{grid-template-columns:1fr}.toolrow{grid-template-columns:1fr;gap:6px}.ag-row{grid-template-columns:60px 1fr;gap:12px}}
+
+/* ---------- CALL YOUR SHOT ---------- */
+.cys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.cys-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:3px;padding:16px 18px;cursor:pointer;transition:.25s var(--ease)}
+.cys-card:hover{border-color:var(--red)}
+.cys-card h4{font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:#fff;padding-right:24px;line-height:1.2}
+@media(max-width:780px){.cys{grid-template-columns:1fr}}
+/* ---------- VOTING CONTROLS ---------- */
+.vwrap{display:flex;align-items:center;gap:8px}
+.vbtn{width:28px;height:28px;border:1px solid var(--line-2);background:transparent;color:var(--gA);border-radius:3px;font-size:16px;font-weight:800;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;transition:.18s}
+.vbtn:hover{border-color:var(--red);color:#fff}
+.vbtn.add{border-color:var(--red);color:#fff;background:rgba(226,0,26,.16)}
+.vbtn.add:hover{background:var(--red)}
+.lb-row .score{cursor:pointer;min-width:30px;text-align:center}
+
+/* ---------- SUBMIT & VOTE PANEL ---------- */
+.submitp{display:flex;align-items:center;gap:18px;margin-top:18px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:4px;padding:14px 18px}
+.submitp .qrwrap{position:relative;width:172px;height:172px;flex:0 0 172px;background:#fff;border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:center}
+.submitp .qr{width:100%;height:100%;object-fit:contain;display:block}
+.submitp .qrlogo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30%;background:#fff;padding:6px;border-radius:6px;box-shadow:0 0 0 3px #fff;display:flex}
+.submitp .qrlogo img{width:100%;height:auto;display:block;filter:brightness(0)}
+.submitp .qrph{width:104px;height:104px;flex:0 0 104px;display:none;align-items:center;justify-content:center;text-align:center;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px dashed var(--line-2);border-radius:4px;padding:8px;line-height:1.4}
+.submitp .sp-t{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:800;margin-bottom:6px}
+.submitp .sp-d{font-size:13px;color:var(--gD);line-height:1.5}
+.submitp a.submit-link{color:#fff;font-weight:700;border-bottom:1px solid var(--red);text-decoration:none;word-break:break-all}
+#lbPanel .submitp{margin:0 0 16px}
+
+.fadein{opacity:0;transform:translateY(12px)}
+.node.active .fadein{animation:fi .55s var(--ease) forwards}
+.node.active .d1{animation-delay:.05s}.node.active .d2{animation-delay:.13s}.node.active .d3{animation-delay:.21s}.node.active .d4{animation-delay:.29s}.node.active .d5{animation-delay:.37s}.node.active .d6{animation-delay:.45s}
+@keyframes fi{to{opacity:1;transform:none}}
+
+.node::-webkit-scrollbar{width:8px} .node::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+#lbPanel::-webkit-scrollbar{width:8px} #lbPanel::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+
+/* responsive */
+@media(max-width:980px){
+  .g3,.g4,.g6,.weeks,.two-col,.clubs,.psr{grid-template-columns:1fr 1fr}
+  #foot{display:none}
+}
+@media(max-width:600px){
+  .g2,.g3,.g4,.g6,.weeks,.two-col,.clubs,.psr,.vs,.localrules,.awd-grid{grid-template-columns:1fr}
+  .node{padding:58px 20px 86px}
+  .rail-dot .rl{display:none}
+  .poll-row{grid-template-columns:96px 1fr 40px}
+}
+@media(max-height:560px){ .node{justify-content:flex-start} }
+.kbd-hint{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim-2);z-index:45;pointer-events:none;opacity:.8}
+.edge{position:fixed; top:50%; transform:translateY(-50%); z-index:38; width:46px; height:66px; display:flex; align-items:center; justify-content:center; background:rgba(18,18,18,.42); border:1px solid var(--line); color:var(--gA); cursor:pointer; transition:.25s var(--ease); backdrop-filter:blur(4px); border-radius:4px}
+.edge:hover{border-color:var(--red); color:#fff; background:rgba(18,18,18,.74)}
+.edge svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+#edgePrev{left:16px} #edgeNext{right:16px}
+.edge.hide{opacity:0; pointer-events:none; transform:translateY(-50%) scale(.85)}
+@media(max-width:760px){ .edge{width:34px; height:50px} #edgePrev{left:6px} #edgeNext{right:6px} }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<!-- ============ PERSISTENT CHROME ============ -->
+<div class="chrome" id="topbar">
+  <img id="wordmark" src="assets/logo/wordmark-white.png" alt="TaylorMade" title="Back to the tee">
+  <div class="topright">
+    <div id="brandrail"></div>
+    <button class="scorebtn" id="scoreBtn" title="Open the board (L)">⛳ Board<span class="lead-team" id="leadTeam"></span></button>
+  </div>
+</div>
+<div class="chrome" id="botbar">
+  <div id="foot">TAYLORMADE GOLF &nbsp;|&nbsp; CONFIDENTIAL &nbsp;|&nbsp; WORLD MARKETING SUMMIT &nbsp;|&nbsp; AI POWER SESSION</div>
+  <div id="nav">
+    <div class="crumbs" id="crumbs"></div>
+    <button class="ctl" id="backBtn">◀ Back</button>
+    <button class="ctl" id="menuBtn">Scorecard</button>
+    <button class="ctl ctl-home" id="homeBtn" title="Return to the start">↺ Start over</button>
+  </div>
+</div>
+<div class="kbd-hint" id="kbdHint">← → to move · 1–5 to choose · L opens the Results board · S for the scorecard</div>
+<button class="edge" id="edgePrev" title="Previous (←)" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button class="edge" id="edgeNext" title="Next (→)" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+
+<!-- ============ T · TITLE — THE OPEN ============ -->
+<section class="node node--photo" id="T" data-branch="title">
+  <div class="bg ov-86" style="background-image:url('assets/img/di_title.jpg')"></div>
+  <div class="wrap">
+    <img class="t-metal" src="assets/logo/metal-t.png" alt="TaylorMade">
+    <div class="kicker" style="margin-bottom:18px">WORLD MARKETING SUMMIT <span class="sep">/</span> DAY 3 <span class="sep">/</span> AI POWER SESSION</div>
+    <h1 class="title">DIALED<br><span class="ln2">IN.</span></h1>
+    <p class="lead-lg" style="margin-top:24px">The marketing team that gets fluent in AI first will move faster, localize sharper, and win more markets. Today isn't a lecture — it's <span class="hl">a round</span>. Seven stations, real work on a live launch, and a closest-to-the-pin finish. You'll leave holding a prompt you can run <span class="hl">Monday morning</span>. Tee it up.</p>
+    <div class="t-foot">
+      <button class="btn-primary" data-goto="AGENDA">START THE ROUND <span class="ar">▶</span></button>
+      <span class="t-credit">BUILT FOR THE TEAM THAT TELLS TAYLORMADE'S STORY TO THE WORLD</span>
+    </div>
+    <small class="note" style="margin-top:26px;color:var(--dim-2)">Choose-your-path, not a slideshow — play your own ball, and the <b style="color:var(--g7)">Scorecard</b> button always brings you back. <span class="hl" style="color:var(--g7)">It was built in Claude — what you're clicking <em>is</em> the demo.</span></small>
+  </div>
+</section>
+
+<!-- ============================================================ AGENDA ============================================================ -->
+<section class="node node--photo" id="AGENDA" data-branch="tee">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_agenda.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Today's card · the round at a glance</div>
+    <h2 class="h">TODAY'S ROUND</h2>
+    <p class="lead" style="margin-top:12px">Ninety minutes, seven stations, one round. Here's the card — each station's golf name and, in plain terms, what it's for. <span style="color:var(--dim)">It stays hands-on the whole way; the ⛳ Board button (top-right) opens the contest.</span></p>
+    <div class="agenda">
+      <div class="ag-row fadein d1" data-goto="TEE"><div class="ag-t">~8 min</div><div><h4>The Tee <span class="ag-plain">Where we stand</span></h4><div class="ag-p">Call the team's handicap, the local rules (approved tools), and what you'll walk away with.</div></div></div>
+      <div class="ag-row fadein d2" data-goto="ACCESS"><div class="ag-t">~15 min</div><div><h4>The Bag <span class="ag-plain">Crash course · fundamentals</span></h4><div class="ag-p">For anyone not yet up to speed: what Claude is, which model to use, effort &amp; cost, memory, connectors, and image tools.</div></div></div>
+      <div class="ag-row fadein d3" data-goto="ROUTINE"><div class="ag-t">~12 min</div><div><h4>The Range <span class="ag-plain">The one habit</span></h4><div class="ag-p">The Pre-Shot Routine for great prompts — then warm up your swing on the driving range.</div></div></div>
+      <div class="ag-row fadein d4" data-goto="COURSE"><div class="ag-t">~20 min</div><div><h4>The Course <span class="ag-plain">Your real work</span></h4><div class="ag-p">Pick your function. Copy-ready prompts, plus three live signature demos.</div></div></div>
+      <div class="ag-row fadein d5" data-goto="PRO1"><div class="ag-t">~ flex</div><div><h4>Going Pro <span class="ag-plain">Advanced · scale it</span></h4><div class="ag-p">From a chat to a system: Project → Skill, feed it your assets, on-brand design, and verify. Optional — skip for a beginner room.</div></div></div>
+      <div class="ag-row fadein d5" data-goto="SCRAMBLE"><div class="ag-t">~15 min</div><div><h4>Closest to the Pin <span class="ag-plain">The contest</span></h4><div class="ag-p">Three scenarios — a plan, an image, or Rory's back-to-back Masters moment. Write your own prompt, present, and the room votes.</div></div></div>
+      <div class="ag-row fadein d6" data-goto="CLUB"><div class="ag-t">~10 min</div><div><h4>The 19th <span class="ag-plain">Sign the card</span></h4><div class="ag-p">A summary scorecard, your two shared skills, and your Monday move.</div></div></div>
+    </div>
+    <div class="btnrow"><button class="btn-primary" data-goto="TEE">To the tee <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- ============================================================ TEE ============================================================ -->
+<!-- TEE · current state / handicap -->
+<section class="node node--photo" id="TEE" data-branch="tee">
+  <div class="bg ov-72" style="background-image:url('assets/img/di_tee.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Tee · where the team stands today</div>
+    <h2 class="h">KNOW YOUR HANDICAP</h2>
+    <p class="lead" style="margin-top:14px">Before any round, you know your handicap. So let's call ours. <span class="hl">Tap a bar as hands go up.</span> No wrong answer — we're all on the same course, just teeing off from different spots. The point isn't the score; it's that today we move up together.</p>
+    <div class="poll fadein d1">
+      <div class="pq"><b>"How would you rate your AI comfort today?"</b> &nbsp;Show of hands — facilitator taps to tally.</div>
+      <div class="poll-row" data-poll="0"><span class="pl">Beginner</span><div class="poll-bar"><div class="poll-fill"></div></div><span class="pv">0</span></div>
+      <div class="poll-row" data-poll="1"><span class="pl">Some experience</span><div class="poll-bar"><div class="poll-fill"></div></div><span class="pv">0</span></div>
+      <div class="poll-row" data-poll="2"><span class="pl">Regular user</span><div class="poll-bar"><div class="poll-fill"></div></div><span class="pv">0</span></div>
+      <div class="poll-row" data-poll="3"><span class="pl">Advanced</span><div class="poll-bar"><div class="poll-fill"></div></div><span class="pv">0</span></div>
+      <div class="poll-ctrls">
+        <button class="tally-btn" id="pollReset">↺ Reset tally</button>
+        <span class="phint">Counts are illustrative until you tally the room.</span>
+      </div>
+    </div>
+    <div class="strip fadein d2" style="margin-top:22px"><div class="st">We're all on the same course — at different tees</div><p>There's no wrong answer above. Wherever you are is the right place to start. Here's roughly <b class="hl">what each level looks like in marketing</b> — find yourself, then today we move you up one.</p></div>
+    <div class="cards g4" style="margin-top:14px">
+      <div class="card-i fadein d2"><div class="tier">Beginner</div><h4>Curious, barely started</h4><p>Tried it once or twice; not sure what to ask or whether to trust it. You still write every brief, recap, and email from a blank page.</p></div>
+      <div class="card-i fadein d2"><div class="tier">Some experience</div><h4>Occasional · one task at a time</h4><p>You reach for it now and then — draft an email, summarize a doc, spin up headlines. One-off chats, and you re-explain yourself each time.</p></div>
+      <div class="card-i fadein d3"><div class="tier">Regular user</div><h4>Daily · part of the workflow</h4><p>First drafts, competitive scans, reworking copy, summarizing across docs. You've set memory or used a connector, and you edit from a strong first draft.</p></div>
+      <div class="card-i fadein d4"><div class="tier">Advanced</div><h4>Building systems, not just chatting</h4><p>Projects with your own files, repeatable Skills, connectors across your stack, on-brand by default. You design workflows and teach others.</p></div>
+    </div>
+    <div class="btnrow"><button class="btn-ghost" data-goto="RULES">First, the local rules ▶</button></div>
+  </div>
+</section>
+
+<!-- RULES · approved tools -->
+<section class="node node--photo" id="RULES" data-branch="tee">
+  <div class="bg ov-72" style="background-image:url('assets/img/di_rules.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Tee · local rules</div>
+    <h2 class="h">KNOW THE LOCAL RULES</h2>
+    <p class="lead" style="margin-top:14px">Every course has local rules. Ours come down to one: <b class="hl">use only the approved tools, always signed in with your @taylormadegolf.com SSO.</b> That switches on enterprise data protection, and <b class="hl">your data is never used to train the AI</b>. If a tool isn't on the approved list, it's out of bounds — no exceptions.</p>
+    <div class="localrules">
+      <div class="lr ok fadein d1">
+        <div class="lr-h"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--red);fill:none;stroke-width:2"><path d="M5 13l4 4L19 7"/></svg>In play · approved</div>
+        <div class="lr-list">
+          <div class="lr-item"><span class="mk">✓</span>Claude</div>
+          <div class="lr-item"><span class="mk">✓</span>Copilot Chat</div>
+          <div class="lr-item"><span class="mk">✓</span>Microsoft 365 Copilot</div>
+          <div class="lr-item"><span class="mk">✓</span>Adobe Firefly</div>
+          <div class="lr-item"><span class="mk">✓</span>Gemini</div>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-top:14px;line-height:1.5">Signed in with SSO, these are cleared for real TaylorMade work — live launches included. IT maintains the list; it can grow over time.</p>
+      </div>
+      <div class="lr no fadein d2">
+        <div class="lr-h"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gA);fill:none;stroke-width:2"><path d="M6 6l12 12M18 6L6 18"/></svg>Everything else · out of bounds</div>
+        <p style="font-size:14px;color:var(--gD);line-height:1.55;font-weight:600">If it isn't on the approved list, it isn't cleared for TaylorMade work — full stop.</p>
+        <p style="font-size:12.5px;color:var(--dim);margin-top:12px;line-height:1.55">Consumer tools people reach for out of habit — <b style="color:#fff">ChatGPT and Grammarly are two common examples</b> — sit outside our enterprise protection, so what you paste into them isn't safe. They aren't a special blacklist; they're just the ones that come up most.</p>
+        <p style="font-size:12.5px;color:var(--dim);margin-top:10px;line-height:1.55">When in doubt, ask before you paste — FreshService or ali.chitsaz@taylormadegolf.com.</p>
+      </div>
+    </div>
+    <small class="note">The whole point of SSO: what you paste, upload, and ask stays inside TaylorMade's environment. That's what makes it safe to use on a real launch — not a sandbox.</small>
+    <div class="btnrow"><button class="btn-ghost" data-goto="ROUTINE">To the range ▶</button></div>
+  </div>
+</section>
+
+<!-- ============================================================ THE BAG (fundamentals) ============================================================ -->
+<!-- BAG1 · the basics / 4-step flow + hub -->
+<!-- ACCESS · how to get Claude -->
+<section class="node node--photo" id="ACCESS" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag1.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · get set up · approved &amp; SSO</div>
+    <h2 class="h">TEE IT UP ANYWHERE</h2>
+    <p class="lead" style="margin-top:12px">One login, every device. Sign in with your <b class="hl">TaylorMade SSO</b> and the same chats, memory, and projects follow you — desk to phone to laptop.</p>
+    <div class="cards g3" style="margin-top:14px">
+      <div class="card-i d1 fadein"><div class="tier">no install · any browser</div><h4>Web</h4><p><b class="hl">claude.ai</b> — open it in Chrome or Edge and you're in. Nothing to download.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">Mac &amp; Windows</div><h4>Desktop app</h4><p>Get it at <b class="hl">claude.com/download</b>. The native app adds <b>Cowork</b> — files and multi-step tasks on your machine.</p></div>
+      <div class="card-i d3 fadein"><div class="tier">iOS &amp; Android</div><h4>Mobile</h4><p>Search <b class="hl">"Claude"</b> in the App Store or Google Play. Dictate on the go, pick it up at your desk.</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px;font-size:15px">Beyond the chat window, Claude meets your work where it already lives — all TaylorMade-approved:</p>
+    <div class="pillrow">
+      <span class="pill"><b>Cowork</b> — desktop agent for files &amp; tasks</span>
+      <span class="pill"><b>Claude in Chrome</b> — act in the browser</span>
+      <span class="pill"><b>Claude in Excel &amp; PowerPoint</b></span>
+      <span class="pill"><b>M365 Copilot</b> — quick help inside Office</span>
+    </div>
+    <small class="note">Everything signs in with <b style="color:#fff">SSO</b> and runs inside TaylorMade's environment; licensed tools require manager approval. Full list &amp; the AI policy → <b class="hl">aiuseguide.tmgolf.biz</b></small>
+    <div class="btnrow"><button class="btn-primary" data-goto="ANATOMY">Find your way around <span class="ar">▶</span></button></div>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://claude.com/download" target="_blank" rel="noopener">Download Claude <span class="dom">claude.com</span></a><a class="src" href="https://aiuseguide.tmgolf.biz/" target="_blank" rel="noopener">TaylorMade AI Tools Guide <span class="dom">aiuseguide.tmgolf.biz</span></a></div></div>
+  </div>
+</section>
+
+<!-- ANATOMY · find your way around (interactive UI map) -->
+<section class="node node--photo" id="ANATOMY" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag4.jpg')"></div>
+  <style>
+    #ANATOMY .wrap{max-width:1200px}
+    #ANATOMY .anat{display:grid;grid-template-columns:1.12fr .88fr;gap:30px;align-items:center;margin-top:16px}
+    #ANATOMY .anat-app{position:relative;display:grid;grid-template-columns:152px 1fr;background:#1b1b1d;border:1px solid #2e2e31;border-radius:14px;overflow:hidden;box-shadow:0 26px 64px rgba(0,0,0,.55)}
+    #ANATOMY .anat-rail{background:#161617;border-right:1px solid #29292b;padding:11px 8px;display:flex;flex-direction:column;gap:2px}
+    #ANATOMY .anat-rail .row{position:relative;display:flex;align-items:center;gap:9px;font-size:12px;color:#c2c2c6;padding:7px 9px;border-radius:8px}
+    #ANATOMY .anat-rail .row.hot{color:#fff;background:#2b2b2e}
+    #ANATOMY .anat-rail .row svg{width:16px;height:16px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    #ANATOMY .anat-rail .sep{height:1px;background:#29292b;margin:7px 5px}
+    #ANATOMY .anat-main{padding:24px 24px 18px;position:relative}
+    #ANATOMY .anat-chip{display:flex;align-items:center;gap:6px;font-size:11px;color:#bcbcc0;background:#242427;border:1px solid #303034;border-radius:20px;padding:4px 11px;margin:0 auto 13px;width:max-content}
+    #ANATOMY .anat-greet{font-family:Georgia,'Times New Roman',serif;font-size:21px;color:#ececee;text-align:center;margin-bottom:15px}
+    #ANATOMY .anat-greet .sp{color:var(--red)}
+    #ANATOMY .anat-box{background:#202023;border:1px solid #35353b;border-radius:13px;padding:13px 13px 9px;position:relative}
+    #ANATOMY .anat-ph{color:#86868b;font-size:13px;padding:2px 2px 18px}
+    #ANATOMY .anat-bar{display:flex;align-items:center;gap:9px}
+    #ANATOMY .anat-bar .sp{flex:1}
+    #ANATOMY .ctl{position:relative;display:flex;align-items:center;gap:6px;color:#d2d2d6}
+    #ANATOMY .ctl svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    #ANATOMY .anat-model{display:flex;align-items:center;gap:8px;color:#e6e6e9;font-weight:700;font-size:12.5px;position:relative}
+    #ANATOMY .anat-model i{color:#9a9a9d;font-style:normal;font-weight:600}
+    #ANATOMY .anat-quick{display:flex;gap:8px;justify-content:center;margin-top:13px;flex-wrap:wrap}
+    #ANATOMY .anat-quick span{font-size:11px;color:#bcbcc0;border:1px solid #303034;border-radius:8px;padding:5px 10px}
+    #ANATOMY .pin{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(0,0,0,.55);border:2px solid #1b1b1d;z-index:4;right:-7px;top:-7px}
+    #ANATOMY .anat-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+    #ANATOMY .anat-legend li{display:flex;gap:11px;font-size:13px;color:var(--dim);line-height:1.34}
+    #ANATOMY .anat-legend .n{flex:0 0 auto;width:21px;height:21px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;font-size:11.5px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+    #ANATOMY .anat-legend b{color:#fff;font-weight:800}
+    @media(max-width:860px){#ANATOMY .anat{grid-template-columns:1fr}}
+  </style>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · the interface · where everything lives</div>
+    <h2 class="h">FIND YOUR WAY AROUND</h2>
+    <p class="lead" style="margin-top:10px">Same window every time — desktop app and <b class="hl">claude.ai</b> look the same. Here are the eight controls you'll actually use.</p>
+    <div class="anat">
+      <div class="anat-app">
+        <div class="anat-rail">
+          <div class="row hot"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New chat<b class="pin">1</b></div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H8l-4 4z"/></svg>Chats</div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M4 7h5l2 2h9v9H4z"/></svg>Projects<b class="pin">2</b></div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M7 4h7l4 4v12H7z"/><path d="M14 4v4h4"/></svg>Artifacts</div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="17" r="2"/></svg>Customize<b class="pin">3</b></div>
+          <div class="sep"></div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></svg>Code</div>
+          <div class="row"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-1.3 1-1.8 1.8-1.8h1.1A2.8 2.8 0 0 0 21 14.6 8 8 0 0 0 12 3z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/></svg>Design<b class="pin">9</b></div>
+        </div>
+        <div class="anat-main">
+          <div class="anat-chip"><svg viewBox="0 0 24 24" width="12" height="12" style="fill:none;stroke:#bcbcc0;stroke-width:1.7"><path d="M4 7h5l2 2h9v9H4z"/></svg>TaylorMade / SunDayRed</div>
+          <div class="anat-greet"><span class="sp">✳</span> How can I help you today?</div>
+          <div class="anat-box">
+            <div class="anat-ph">Ask anything — or paste your Pre-Shot Routine…<b class="pin">4</b></div>
+            <div class="anat-bar">
+              <span class="ctl"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b class="pin">5</b></span>
+              <span class="sp"></span>
+              <span class="anat-model">Sonnet 4.6 <i>Low ▾</i><b class="pin">6</b></span>
+              <span class="ctl"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><b class="pin">7</b></span>
+              <span class="ctl"><svg viewBox="0 0 24 24"><path d="M5 9v6M9 6v12M13 4v16M17 8v8M21 10v4"/></svg><b class="pin">8</b></span>
+            </div>
+          </div>
+          <div class="anat-quick"><span>✎ Write</span><span>📈 Strategize</span><span>✦ Claude's choice</span></div>
+        </div>
+      </div>
+      <ol class="anat-legend">
+        <li><span class="n">1</span><div><b>New chat</b> — start fresh. One topic per chat keeps answers sharp.</div></li>
+        <li><span class="n">2</span><div><b>Chats vs Projects</b> — Chats is your history. A <b>Project</b> is a workspace with its own files + memory for work you return to.</div></li>
+        <li><span class="n">3</span><div><b>Customize</b> — turn Skills on here. Your two shared skills live in this menu.</div></li>
+        <li><span class="n">4</span><div><b>The prompt box</b> — plain English. This is where the Pre-Shot Routine goes.</div></li>
+        <li><span class="n">5</span><div><b>Attach (＋)</b> — add a file, or pull from a connector: SharePoint, Box, Outlook.</div></li>
+        <li><span class="n">6</span><div><b>Model &amp; effort</b> — Opus for complex, Sonnet for everyday, Haiku for quick. Effort sets how hard it swings.</div></li>
+        <li><span class="n">7</span><div><b>Dictate (mic)</b> — talk instead of type; press and hold to record.</div></li>
+        <li><span class="n">8</span><div><b>Voice mode</b> — hands-free, spoken back-and-forth.</div></li>
+        <li><span class="n">9</span><div><b>Design</b> — Claude Design turns an idea or a doc into polished, on-brand layouts and graphics. We go deeper in Going Pro.</div></li>
+      </ol>
+    </div>
+    <div class="btnrow"><button class="btn-primary" data-goto="BAG1">The crash course <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<section class="node node--photo" id="BAG1" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag1.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · your toolkit · crash course</div>
+    <h2 class="h">KNOW WHAT'S IN YOUR BAG</h2>
+    <p class="lead" style="margin-top:12px">A quick crash course before we play — so everyone's even, wherever you're starting from. The whole loop is four steps: <b class="hl">bring your work in, ask, save the write-up, polish it.</b></p>
+    <div class="cards g4">
+      <div class="card-i d1 fadein"><div class="tier">Step 1 · bring it in</div><h4>Add your work</h4><p>Click <b class="hl">+</b> under the message box → add a file, or pull it from a connector like SharePoint or Box.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">Step 2 · ask</div><h4>Say what you want</h4><p>Plain English: <em>"Summarize this launch recap and flag the three things a leader should know."</em></p></div>
+      <div class="card-i d3 fadein"><div class="tier">Step 3 · save</div><h4>Save the write-up</h4><p><em>"Write this up as a markdown (.md) file."</em> You get a clean document to build from.</p></div>
+      <div class="card-i d4 fadein"><div class="tier">Step 4 · polish</div><h4>Make it shine</h4><p>Ask for a one-pager or a 6-slide deck — Claude builds it and exports to PowerPoint or PDF.</p></div>
+    </div>
+    <p class="lead" style="margin-top:24px;font-size:15px">Three things make all of this work far better. <span style="color:var(--dim)">Tap to go deeper — or press 1–3.</span></p>
+    <div class="choices g3" style="margin-top:14px">
+      <button class="choice mini" data-goto="BAG2" data-key="1"><span class="num">1</span><h4>Which model &amp; how much effort</h4></button>
+      <button class="choice mini" data-goto="BAG3" data-key="2"><span class="num">2</span><h4>Memory — so it always knows you</h4></button>
+      <button class="choice mini" data-goto="BAG4" data-key="3"><span class="num">3</span><h4>Connectors &amp; image tools</h4></button>
+    </div>
+    <small class="note">Run this loop enough and it graduates — a one-off chat becomes a <b>Project</b>, a repeated task becomes a <b>Skill</b>. That's <b class="hl">Going Pro</b>, later in the round.</small>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://support.claude.com/en/articles/9517075-what-are-projects" target="_blank" rel="noopener">What Projects are <span class="dom">support.claude.com</span></a><a class="src" href="https://www.anthropic.com/news/claude-design-anthropic-labs" target="_blank" rel="noopener">Claude Design <span class="dom">anthropic.com</span></a></div></div>
+  </div>
+</section>
+
+<!-- BAG2 · models & effort -->
+<section class="node node--photo" id="BAG2" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag2.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · match the model to the moment</div>
+    <h2 class="h">MODELS &amp; EFFORT</h2>
+    <p class="lead" style="margin-top:12px">Three Claudes in the picker — same brain, tuned for different moments. Not better-or-worse; the right one for the job. <b class="hl">Sonnet 4.6</b> is the default and right for almost everything.</p>
+    <div class="cards g3" style="margin-top:14px">
+      <div class="card-i d1 fadein"><div class="tier">the high-stakes moments</div><h4>Opus 4.8</h4><p>The heavy lift — reach for it when it has to be exactly right: the board-ready analysis, the call you can't get wrong.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">everyday · your default</div><h4>Sonnet 4.6</h4><p>Your everyday partner — fast, sharp, right for almost everything. Already selected for you.</p></div>
+      <div class="card-i d3 fadein"><div class="tier">fast · high-volume</div><h4>Haiku 4.5</h4><p>The quick one — instant answers for simple, high-volume work, and the one you'll reach for most.</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px;font-size:15px">Next to the model is an <b class="hl">effort</b> setting — how hard it thinks before answering. <b class="hl">Pick a model, drag the effort</b> — they stack, so each one adds depth and each one costs more time and burns your limits faster.</p>
+    <style>
+      #BAG2 .modelsel{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+      #BAG2 .msb{font-family:inherit;font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--gD);background:#161616;border:1px solid var(--line);border-radius:5px;padding:9px 16px;cursor:pointer;transition:.2s}
+      #BAG2 .msb:hover{border-color:var(--line-2,#444)}
+      #BAG2 .msb.on{background:var(--red);border-color:var(--red);color:#fff}
+    </style>
+    <div class="dialwrap fadein d2">
+      <div class="modelsel" id="modelSel">
+        <button class="msb" data-m="0">Haiku 4.5</button>
+        <button class="msb on" data-m="1">Sonnet 4.6</button>
+        <button class="msb" data-m="2">Opus 4.8</button>
+      </div>
+      <div class="dial-top">
+        <div class="dial-level" id="dlName">SONNET 4.6 · LOW<span class="api" id="dlApi">balanced model · low effort</span></div>
+        <div class="dial-use" id="dlUse">The default — fast, sharp, right for almost everything you do.</div>
+      </div>
+      <div class="track" id="track">
+        <div class="track-line"></div><div class="track-fill" id="trackFill"></div>
+        <div class="stop isdef" data-i="0" style="left:5%"><div class="deflab">▼ default</div><div class="knob"></div><div class="lab">low</div></div>
+        <div class="stop" data-i="1" style="left:37%"><div class="knob"></div><div class="lab">medium</div></div>
+        <div class="stop" data-i="2" style="left:68%"><div class="knob"></div><div class="lab">high</div></div>
+        <div class="stop" data-i="3" style="left:97%"><div class="knob"></div><div class="lab">max</div></div>
+      </div>
+      <div class="dial-bars">
+        <div class="meter"><div class="ml"><span>Depth &amp; thoroughness</span><span id="capV">40%</span></div><div class="mt"><div class="mf cap" id="capBar" style="width:40%"></div></div></div>
+        <div class="meter"><div class="ml"><span>Time &amp; limits used</span><span id="costV">18%</span></div><div class="mt"><div class="mf cost" id="costBar" style="width:18%"></div></div></div>
+      </div>
+      <div class="dial-hint" id="dlHint"><b>Try it:</b> flip between <b>Sonnet · Max</b> and <b>Opus · High</b> — close on depth, but Sonnet·Max costs less. <b>Rule of thumb:</b> start at Sonnet·Low; raise effort before switching models; reach for Opus only when complexity — not length — demands it. <span style="color:var(--dim-2)">(Meters are a directional feel, not exact figures.)</span></div>
+    </div>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://platform.claude.com/docs/en/about-claude/models/overview" target="_blank" rel="noopener">The models <span class="dom">platform.claude.com</span></a></div></div>
+  </div>
+</section>
+
+<!-- BAG3 · memory -->
+<section class="node node--photo" id="BAG3" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag3.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · set up your caddie</div>
+    <h2 class="h">YOUR CADDIE KNOWS YOUR GAME</h2>
+    <p class="lead" style="margin-top:12px">A great caddie remembers your game — your tendencies, your distances — so you never re-explain yourself on the next hole. Claude's <b class="hl">memory</b> is your caddie. Have <b class="hl">one conversation</b> to set it up, and every future chat already knows who you are and what you're focused on.</p>
+    <div class="prompt fadein d1"><button class="copybtn" data-copy>⧉ Copy</button><span class="pm">The memory setup conversation — copy, edit, send once</span><span class="ptxt">Please remember this about me for future chats: I'm [NAME], [ROLE] on the TaylorMade marketing team for [REGION]. I focus on [the products, markets, and channels you own]. Our brand voice is premium, confident, performance-driven, and authentic. When I ask for marketing work, default to my region's context, write in that voice, and flag where you need a specific detail from me. Tell me what you've saved.</span></div>
+    <div class="two-col fadein d2">
+      <div class="col"><h4>What to put in memory</h4><ul><li>Who you are and your region.</li><li>The products, markets, and channels you own.</li><li>Your brand voice and any always-rules.</li><li>Formats you ask for often — briefs, calendars, recaps.</li></ul></div>
+      <div class="col"><h4>Why it's worth 5 minutes</h4><ul><li>Move 1 of the Pre-Shot Routine gets shorter — you skip the intro every time.</li><li>Outputs start in your context, not generic.</li><li>Update it any time your focus changes.</li><li>It stays in your account, inside TaylorMade's environment.</li></ul></div>
+    </div>
+    <small class="note">Memory is private to your account — it never leaves TaylorMade's enterprise environment, and it's never used to train the AI. This is the habit that makes every other prompt better.</small>
+  </div>
+</section>
+
+<!-- BAG4 · connectors & image tools -->
+<section class="node node--photo" id="BAG4" data-branch="bag">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_bag4.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Bag · the right club for every shot</div>
+    <h2 class="h">CONNECTORS &amp; THE RIGHT TOOL</h2>
+    <p class="lead" style="margin-top:12px"><b class="hl">Connectors</b> let Claude work on your real files where they already live — no downloading. Open the <b class="hl">+</b> menu → Connectors, sign in with SSO, and point Claude at the inbox or folder. You only ever see what you already have access to.</p>
+    <div class="pillrow">
+      <span class="pill"><b>Microsoft 365</b> — Outlook · Teams · SharePoint</span>
+      <span class="pill"><b>Box</b> — shared drives &amp; assets</span>
+      <span class="pill">…more in the Connectors menu</span>
+    </div>
+    <p class="lead" style="margin-top:24px;font-size:15px">Different shots call for different clubs. Use the right tool for the job:</p>
+    <div style="margin-top:14px">
+      <div class="toolrow fadein d1"><div class="tn">Claude<span>think · write · analyze</span></div><div class="tu">Briefs, copy, competitive analysis, research, summarizing across your docs and connectors. Your reasoning and writing club.</div></div>
+      <div class="toolrow fadein d2"><div class="tn">M365 Copilot<span>inside office</span></div><div class="tu">Quick help right inside Outlook, Word, Excel, and PowerPoint.</div></div>
+      <div class="toolrow fadein d3"><div class="tn">Gemini Enterprise<span>image generation</span></div><div class="tu">Generating images and visuals, plus Google-suite tasks. One of our two approved image tools.</div></div>
+      <div class="toolrow fadein d4"><div class="tn">Adobe Firefly<span>image generation</span></div><div class="tu">Image generation built for commercial-safe use, right inside Creative Cloud. Our other approved image tool.</div></div>
+    </div>
+    <small class="note">Claude is your thinking and writing partner — for marketing <b style="color:var(--g7)">visuals and image generation, reach for Gemini Enterprise or Adobe Firefly.</b> All approved, all signed in with SSO.</small>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://claude.com/partners/mcp" target="_blank" rel="noopener">Connectors <span class="dom">claude.com</span></a></div></div>
+  </div>
+</section>
+
+<!-- ============================================================ RANGE ============================================================ -->
+<!-- ROUTINE · the pre-shot routine (framework) -->
+<section class="node node--photo" id="ROUTINE" data-branch="range">
+  <div class="bg ov-72" style="background-image:url('assets/img/di_routine.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Range · the one habit that changes everything</div>
+    <h2 class="h">THE PRE-SHOT ROUTINE</h2>
+    <p class="lead" style="margin-top:14px">Every good golfer runs the <b class="hl">same routine before every swing</b> — read the lie, pick the club, see the shot. Great prompting is the same discipline. Three moves, every time, and vague requests become expert-level outputs. <span style="color:var(--dim)">Set up memory once — your caddie, back in The Bag — and Move 1 gets shorter every swing.</span></p>
+    <div class="psr">
+      <div class="psr-step fadein d1"><div class="sn">Move 1</div><h4>Read the lie</h4><div class="gloss">The situation today.</div><p>Give Claude <b style="color:#fff">what's specific to this shot</b> — the product, the market, the deadline. If your caddie (memory) already knows who you are, skip the intro and go straight to today's context.</p></div>
+      <div class="psr-step fadein d2"><div class="sn">Move 2</div><h4>Pick the club</h4><div class="gloss">Define the task.</div><p>Say <b style="color:#fff">exactly what you want it to do</b>: "Draft the campaign brief," "Write 5 captions," "Tear down this competitor." One clear shot, not "help me with marketing."</p></div>
+      <div class="psr-step fadein d3"><div class="sn">Move 3</div><h4>See the shot</h4><div class="gloss">Specify the rules.</div><p>Picture the landing: <b style="color:#fff">format, length, tone, audience</b>. "One-page exec brief, premium voice, ready for HQ." Now it lands where you aimed.</p></div>
+    </div>
+    <div class="prompt fadein d3" style="margin-top:22px"><button class="copybtn" data-copy>⧉ Copy</button><span class="pm">All three moves, in one breath</span><span class="ptxt">You are a senior brand marketer for TaylorMade Golf launching the P-Series irons in Korea this season — precision-focused golfers, heavy KakaoTalk usage, Callaway pushing fitting bundles. Draft three campaign messages and a one-page launch brief. Premium, confident voice, ready for HQ review.</span></div>
+    <div class="strip fadein d4"><div class="st">And the 4th move — commit &amp; adjust</div><p>First answer 80% there? That's normal — it's a conversation, not a vending machine. Take a <b class="hl">mulligan</b>: "tighten to the top 3, add a Japan angle, make it punchier." You refine, you don't restart. <span style="color:var(--muted)">(This is the master doc's <b class="hl">RACI-P</b> framework, re-cut as a routine you'll actually remember on the tee.)</span></p></div>
+    <div class="btnrow"><button class="btn-ghost" data-goto="RANGE">Now hit some balls ▶</button></div>
+  </div>
+</section>
+
+<!-- RANGE · driving range distance meter -->
+<section class="node node--photo" id="RANGE" data-branch="range">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_range.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The Range · warm up your swing</div>
+    <h2 class="h">HOW FAR DOES YOUR PROMPT FLY?</h2>
+    <p class="lead" style="margin-top:12px">Start with a lazy prompt — <span style="font-family:var(--mono);color:#fff">"write some social posts."</span> It dribbles off the tee. Now add the routine, one club at a time, and watch the distance. <span style="color:var(--dim)">Tap the clubs.</span></p>
+    <div class="range fadein d1">
+      <div class="range-top">
+        <div class="range-dist" id="rDist">60<span class="yd">YDS</span></div>
+        <div class="range-verdict" id="rVerdict">Topped it. Vague in, vague out — Claude has nothing to aim at.</div>
+      </div>
+      <div class="fairway"><span class="yds">tee</span><div class="ball" id="rBall"></div><span class="pin">⛳</span></div>
+      <div class="clubs">
+        <button class="club" data-yd="55" data-add="role"><span class="cy">+55</span><div class="ck">Read the lie</div><div class="cn">Role</div></button>
+        <button class="club" data-yd="60" data-add="context"><span class="cy">+60</span><div class="ck">Read the lie</div><div class="cn">Context</div></button>
+        <button class="club" data-yd="45" data-add="task"><span class="cy">+45</span><div class="ck">Pick the club</div><div class="cn">Task</div></button>
+        <button class="club" data-yd="50" data-add="format"><span class="cy">+50</span><div class="ck">See the shot</div><div class="cn">Format</div></button>
+        <button class="club" data-yd="50" data-add="specifics"><span class="cy">+50</span><div class="ck">Commit</div><div class="cn">Real specifics</div></button>
+      </div>
+      <div class="builtprompt" id="rPrompt"><span class="bp-lab">Your prompt, assembling live</span><span id="rPromptTxt"><em>Write some social posts.</em></span></div>
+    </div>
+    <div class="vs">
+      <div class="swing am fadein d2"><div class="sw-l">Amateur swing</div><div class="sw-p">"Write some social posts for our new driver."</div><div class="sw-o">Generic captions any brand could run. No region, no athlete, no voice. <b>You rewrite all of it.</b></div></div>
+      <div class="swing pro fadein d3"><div class="sw-l">Tour swing</div><div class="sw-p">"Senior TaylorMade copywriter, premium confident voice. 5 launch captions for Qi in Japan — feature, athlete, lifestyle, retailer, story-hook. Reference our Japan tour player."</div><div class="sw-o">On-brand, on-market, on-message. <b>You edit, not author.</b></div></div>
+    </div>
+    <div class="btnrow"><button class="btn-primary" data-goto="COURSE">Head to the course <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- ============================================================ COURSE (router / scorecard) ============================================================ -->
+<section class="node node--photo" id="COURSE" data-branch="course">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_course.jpg')"></div>
+  <div class="wrap">
+    <div class="redbar"></div>
+    <h2 class="h">PICK YOUR HOLE</h2>
+    <p class="lead" style="margin-top:14px">Every seat here owns a function — and every function has work Claude can do <b class="hl">today</b>. Find yours below: each hole shows real prompts to try. We'll run the three <span class="hl-r">signature holes</span> live right now; you take the full set home in the handout. <span style="color:var(--dim)">(Swap the [brackets] for your real details — Claude only knows what you give it.)</span></p>
+    <style>
+      #COURSE .ex{margin:7px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+      #COURSE .ex li{list-style:none;font-size:12.5px;color:var(--dim);line-height:1.32;padding-left:14px;position:relative}
+      #COURSE .ex li:before{content:"\203A";position:absolute;left:0;top:0;color:var(--red);font-weight:800}
+      #COURSE .livetag{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:10.5px;letter-spacing:.08em;font-weight:800;color:var(--red);text-transform:uppercase}
+    </style>
+    <div class="cards g3" style="margin-top:18px">
+      <div class="card-i d1 fadein">
+        <h4>Brand &amp; GTM</h4>
+        <ul class="ex"><li>"Draft a GTM launch brief for [product] in [market]."</li><li>"Rewrite this campaign messaging in our brand voice."</li></ul>
+        <div class="btnrow" style="margin-top:10px"><button class="lnk" data-goto="DEMO1">▶ Watch this one live</button></div>
+      </div>
+      <div class="card-i d2 fadein">
+        <h4>Content &amp; Studio</h4>
+        <ul class="ex"><li>"Write 5 social captions for [campaign] in our voice."</li><li>"Turn this script into a studio shot list."</li></ul>
+      </div>
+      <div class="card-i d3 fadein">
+        <h4>Media, Social &amp; Paid</h4>
+        <ul class="ex"><li>"Build a 30-day content calendar for [channel]."</li><li>"Give me 6 paid-ad variants for [audience]."</li></ul>
+      </div>
+      <div class="card-i d4 fadein">
+        <h4>Analytics &amp; Insights</h4>
+        <ul class="ex"><li>"Turn this messy export into the 3 things leadership needs."</li><li>"What does this data say about [market]?"</li></ul>
+      </div>
+      <div class="card-i d5 fadein">
+        <h4>Marketing Ops &amp; Automation</h4>
+        <ul class="ex"><li>"Sweep my email + Teams + SharePoint for [project] and draft a status."</li><li>"Build a simple tracker for [process] — no code."</li></ul>
+        <div class="btnrow" style="margin-top:10px"><button class="lnk" data-goto="DEMO3">▶ Watch this one live</button></div>
+      </div>
+      <div class="card-i d6 fadein">
+        <h4>Ecommerce &amp; Lifecycle</h4>
+        <ul class="ex"><li>"Write product-page copy for [SKU]."</li><li>"Draft a 3-email lifecycle flow + A/B subject lines."</li></ul>
+      </div>
+      <div class="card-i d6 fadein" style="grid-column:1 / -1">
+        <h4>Competitive Intelligence</h4>
+        <ul class="ex"><li>"Tear down [competitor]'s 2026 marketing — where we win, where we're exposed."</li><li>"Give me the one-page competitive read for leadership."</li></ul>
+        <div class="btnrow" style="margin-top:10px"><button class="lnk" data-goto="DEMO2">▶ Watch this one live</button></div>
+      </div>
+    </div>
+    <div class="btnrow"><button class="btn-primary" data-goto="PRO1">Ready to scale it? Going Pro <span class="ar">▶</span></button><button class="lnk" data-goto="SCRAMBLE">Skip to the contest →</button></div>
+    <small class="note" style="margin-top:10px;opacity:.55">Facilitator — <button class="lnk" data-goto="BACKUP" style="font-size:inherit;padding:0;color:var(--red);text-transform:none;letter-spacing:0">⛑ break glass</button> if a live demo stalls.</small>
+  </div>
+</section>
+
+<!-- DEMO1 -->
+<section class="node node--photo" id="DEMO1" data-branch="course">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_demo1.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Signature hole 1 · live demo</div>
+    <h2 class="h">THE REGIONAL LAUNCH BRIEF</h2>
+    <p class="lead" style="margin-top:12px"><span class="hl-r">Par 5</span> — a week of briefing, approvals, and rewrites. Watch Claude make the turn in five minutes. <span style="color:var(--dim)">This is the full demo prompt — copy it and run it live.</span></p>
+    <p class="lead" style="margin-top:14px;font-size:15px"><b class="hl-r">Call your shot.</b> Predict before we hit send — then run it live and tap each card to check the room.</p>
+    <div class="cys">
+      <div class="cys-card fn"><span class="plus">+</span><h4>Will it hit all five asks?</h4><div class="reveal"><p>Yes — messages, media, athletes, retail, timeline, in order. It structures to exactly what you asked.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>Will it localize to Japan unprompted?</h4><div class="reveal"><p>Yes — it leans into LINE, private clubs, and precision, because the context set it up to.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>Publish-ready, or strong first draft?</h4><div class="reveal"><p>Strong first draft — about 80% there. The framework's done; you bring the final judgment.</p></div></div>
+    </div>
+    <div class="prompt fadein d1" style="margin-top:18px"><button class="copybtn" data-copy>⧉ Copy</button><span class="pm">Demo 1 · paste into Claude</span><span class="ptxt">You are a senior brand marketing strategist for TaylorMade Golf with 15 years of experience in global GTM for premium golf equipment. This output is for an internal HQ global marketing review. Context: TaylorMade launched the Qi4D driver in January 2026. We are now in the Japan market planning for the P790/P-Series irons — Japan's focus product for this season. Japan market context: golf participation is growing (4% rounds growth in 2025), private club memberships remain strong, precision fitting is highly valued by Japanese golfers, and our athlete partnerships with Japanese tour players are a key differentiator. Callaway is active in the market with bundled fitting programs. Intent: Draft a comprehensive Japan market GTM campaign brief for the P-Series irons covering: (1) Three key messages tailored to Japanese golfer values (precision, craftsmanship, performance), (2) Recommended media mix with emphasis on LINE, digital, and in-club activation, (3) Athlete content activation recommendations, (4) Retail partner activation plan for top private club accounts, (5) 90-day timeline from now through summer season. Format: structured executive brief, 700 words, ready for HQ review.</span></div>
+    <div class="why fadein d2"><div class="st">The debrief line</div><p>"What just took your team a week of back-and-forth — briefing, approvals, rewrites — now takes 5 minutes and is directionally <b class="hl">80% of the way there</b>. The brief isn't finished. But the framework is done, and you iterate from here."</p></div>
+    <div class="btnrow fadein d3"><button class="btn-ghost" data-goto="DEMO2">Next signature hole ▶</button><button class="lnk back" data-goto="COURSE">Scorecard</button></div>
+  </div>
+</section>
+
+<!-- DEMO2 -->
+<section class="node node--photo" id="DEMO2" data-branch="course">
+  <div class="bg ov-86" style="background-image:url('assets/img/di_demo2.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Signature hole 2 · live demo</div>
+    <h2 class="h">THE COMPETITIVE TEARDOWN</h2>
+    <p class="lead" style="margin-top:12px">Your competitors read the same reports you do. The edge is <span class="hl">speed</span>. A structured teardown — in 90 seconds.</p>
+    <p class="lead" style="margin-top:14px;font-size:15px"><b class="hl-r">Call your shot.</b> Predict before it runs — then tap each card to check.</p>
+    <div class="cys">
+      <div class="cys-card fn"><span class="plus">+</span><h4>Will it name where we're vulnerable, not just where we win?</h4><div class="reveal"><p>Yes — that's the ask, and it's the half most teardowns skip.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>Generic competitor fluff, or specific positioning?</h4><div class="reveal"><p>Specific — because we told it the exact dimensions to analyze.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>How long would this take by hand?</h4><div class="reveal"><p>Half a day of digging. Here: about 90 seconds.</p></div></div>
+    </div>
+    <div class="prompt fadein d1" style="margin-top:18px"><button class="copybtn" data-copy>⧉ Copy</button><span class="pm">Demo 2 · paste into Claude</span><span class="ptxt">You are a competitive intelligence analyst specializing in the premium golf equipment market. Analyze Callaway Golf's global marketing strategy for 2026 across the following dimensions: (1) Core brand messaging and positioning — what story are they telling?, (2) Athlete and ambassador strategy — who are they featuring and in what markets?, (3) Media and content strategy — where are they investing in paid, earned, and owned?, (4) Retail and channel activation — what programs are they running with green-grass and retail partners?, (5) Where TaylorMade has a clear and defensible advantage, (6) Where TaylorMade is most vulnerable to Callaway's messaging. Output: a structured one-page competitive brief, written for a global brand marketing team. Be specific and direct. Use publicly available information.</span></div>
+    <div class="why fadein d2"><div class="st">The debrief line</div><p>"Your competitors have access to the same information you do. The difference is <b class="hl">speed</b>. Claude synthesizes this in 90 seconds. Your team can do this before every competitive season, every product launch, every retailer meeting."</p></div>
+    <div class="btnrow fadein d3"><button class="btn-ghost" data-goto="DEMO3">Next: the cross-tool hole ▶</button><button class="lnk back" data-goto="COURSE">Scorecard</button></div>
+  </div>
+</section>
+
+<!-- DEMO3 -->
+<section class="node node--photo" id="DEMO3" data-branch="course">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_demo3.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Signature hole 3 · the cross-tool shot</div>
+    <h2 class="h">THE M365 SWEEP</h2>
+    <p class="lead" style="margin-top:12px">Forty-five minutes of inbox archaeology, done in sixty seconds — across <b class="hl">email, Teams, and SharePoint at once</b>.</p>
+    <p class="lead" style="margin-top:14px;font-size:15px"><b class="hl-r">Call your shot.</b> Predict before it runs — then tap each card to check.</p>
+    <div class="cys">
+      <div class="cys-card fn"><span class="plus">+</span><h4>Email AND Teams AND SharePoint in one shot?</h4><div class="reveal"><p>Yes — with the M365 connector on, it works across all three at once.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>Will every item trace back to a source?</h4><div class="reveal"><p>Yes — ask it to, and each decision and owner points to where it came from.</p></div></div>
+      <div class="cys-card fn"><span class="plus">+</span><h4>By hand vs. this?</h4><div class="reveal"><p>About 45 minutes of inbox archaeology → roughly 60 seconds.</p></div></div>
+    </div>
+    <div class="strip fadein d1"><div class="st">Set up first</div><p>Enable the Microsoft 365 connector in Claude: <b class="hl">Settings → Connectors → Microsoft 365 → sign in with TaylorMade SSO.</b></p></div>
+    <div class="prompt fadein d2" style="margin-top:16px"><button class="copybtn" data-copy>⧉ Copy</button><span class="pm">Demo 3 · paste into Claude</span><span class="ptxt">Search my Outlook email and Teams messages from the last 30 days for anything related to the [PRODUCT] launch or [CAMPAIGN TOPIC]. Read the relevant messages and documents. Extract: (1) Key decisions that have been made, (2) Outstanding open questions or unresolved issues, (3) Action items and who owns them. Then draft a one-page status update I can share at our global marketing alignment meeting. Format: executive summary with three sections — Decisions Made, Open Questions, Next Actions.</span></div>
+    <div class="why fadein d3"><div class="st">The debrief line</div><p>"That's 45 minutes of inbox archaeology — done in 60 seconds. And it works across email <b class="hl">AND</b> Teams <b class="hl">AND</b> SharePoint simultaneously. That cross-tool synthesis in one shot is the unlock."</p></div>
+    <div class="btnrow fadein d3"><button class="btn-primary" data-goto="SCRAMBLE">To the contest <span class="ar">▶</span></button><button class="lnk back" data-goto="COURSE">Scorecard</button></div>
+  </div>
+</section>
+
+<!-- BACKUP · facilitator break-glass (utility node, not in ORDER) -->
+<section class="node node--photo" id="BACKUP" data-branch="course">
+  <div class="bg ov-86" style="background-image:url('assets/img/di_demo2.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Facilitator · break glass if a demo stalls</div>
+    <h2 class="h">IF THE LIVE SHOT WON'T DROP</h2>
+    <p class="lead" style="margin-top:10px">Network, latency, or an odd result — it happens. Don't wait in silence: <b class="hl">narrate what good looks like</b>, then keep moving. Here's the expected result for each live hole.</p>
+    <div class="two-col">
+      <div class="col">
+        <h4>What good looks like</h4>
+        <ul>
+          <li><b style="color:#fff">Demo 1 · Japan launch brief</b> — a structured exec brief hitting all five asks (messages, media, athletes, retail, 90-day timeline), localized to Japan. ~80% there; you refine from the framework.</li>
+          <li><b style="color:#fff">Demo 2 · Callaway teardown</b> — a one-page brief that names where TM wins <em>and</em> where we're vulnerable. Half a day of work in ~90 seconds.</li>
+          <li><b style="color:#fff">Demo 3 · M365 sweep</b> — a one-page status across Outlook + Teams + SharePoint: Decisions Made, Open Questions, Next Actions, each traced to a source. (Needs the M365 connector signed in.)</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Recovery moves</h4>
+        <ul>
+          <li>The exact prompt is on each demo card — re-paste and keep talking while it runs.</li>
+          <li>Still stuck? Skip to the next hole and circle back if it lands.</li>
+          <li><b style="color:#fff">Contest</b> — if the live board won't refresh, it falls back to the last saved entries on its own; or read submissions on the monday board directly.</li>
+          <li>The round still works without any single demo. Keep the energy up.</li>
+        </ul>
+      </div>
+    </div>
+    <small class="note">This page is for you, the facilitator — attendees only see it if you bring them here. Full run-of-show is in <b class="hl">Run Sheet.html</b>.</small>
+    <div class="btnrow"><button class="lnk back" data-goto="COURSE">← Back to the course</button></div>
+  </div>
+</section>
+
+<!-- ============================================================ GOING PRO ============================================================ -->
+<!-- PRO1 · the ladder: chat -> project -> skill (hub) -->
+<section class="node node--photo" id="PRO1" data-branch="pro">
+  <div class="bg ov-prod" style="background-image:url('assets/img/soles-ladder.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Going Pro · turn one good round into a system</div>
+    <h2 class="h">FROM A CHAT TO A SYSTEM</h2>
+    <p class="lead" style="margin-top:12px">An amateur hits one great shot and hopes to repeat it. A pro builds a swing they can <b class="hl">reproduce on demand</b>. Same with AI: most people live in one-off chats. Going pro means climbing three rungs — and each one is genuinely easy.</p>
+    <div class="cards g3" style="margin-top:16px">
+      <div class="card-i d1 fadein"><div class="tier">Rung 1 · where every idea starts</div><h4>A Chat</h4><p>Fast, disposable, perfect for exploring. But when it ends, the context is gone — and you re-explain yourself next time.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">Rung 2 · when a topic keeps coming back</div><h4>A Project</h4><p>A workspace with <b class="hl">standing instructions + your files</b>, so every chat inside it already knows the context. New Project → paste your instructions → drop in your files. Two minutes. <span style="color:var(--dim)">Your Golf Ball Packaging work already runs this way — a "read-this-first" file with the die templates right beside it.</span></p></div>
+      <div class="card-i d3 fadein"><div class="tier">Rung 3 · when a task repeats the same way</div><h4>A Skill</h4><p>Package the how-to once and Claude runs it on command — <b class="hl">in any chat, not just one project</b> — and you can hand it to the whole team. <span style="color:var(--dim)">Your Monday Marketing Kick-Off prep is now exactly this: a skill, not a hand-built deck.</span></p></div>
+    </div>
+    <p class="lead" style="margin-top:20px;font-size:15px">Three ways to make the climb pay off. <span style="color:var(--dim)">Tap to go deeper — or press 1–3.</span></p>
+    <div class="choices g3" style="margin-top:12px">
+      <button class="choice mini" data-goto="PRO2" data-key="1"><span class="num">1</span><h4>Feed it your assets</h4></button>
+      <button class="choice mini" data-goto="PRO3" data-key="2"><span class="num">2</span><h4>On-brand by default</h4></button>
+      <button class="choice mini" data-goto="PRO4" data-key="3"><span class="num">3</span><h4>Trust, but verify</h4></button>
+    </div>
+    <div class="btnrow"><button class="lnk" data-goto="SCRAMBLE">Short on time? Skip to the contest →</button></div>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://support.claude.com/en/articles/9517075-what-are-projects" target="_blank" rel="noopener">Projects <span class="dom">support.claude.com</span></a><a class="src" href="https://www.anthropic.com/news/skills" target="_blank" rel="noopener">Agent Skills <span class="dom">anthropic.com</span></a></div></div>
+  </div>
+</section>
+
+<!-- PRO2 · feed it your assets -->
+<section class="node node--photo" id="PRO2" data-branch="pro">
+  <div class="bg ov-prod" style="background-image:url('assets/img/driver-rack.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Going Pro · 1 · feed it your assets</div>
+    <h2 class="h">IT BUILDS WITH WHAT IT CAN SEE</h2>
+    <p class="lead" style="margin-top:12px">Claude makes <b class="hl">artifacts</b> — a brief, a deck, a one-pager, a working tracker, an on-brand graphic — but it can only use what you put in its hands. Give it the real materials and the output stops being a generic guess.</p>
+    <div class="two-col fadein d1" style="margin-top:14px">
+      <div class="col"><h4>Hand it the real thing</h4><ul><li>Attach the file, or open a connector to where it already lives — SharePoint, Box.</li><li>Point it at the <b style="color:#fff">real source</b> — the data, the deck, the examples — so it builds from fact, not a guess.</li><li>The packaging project works because the die templates and the spec sit right next to the work.</li></ul></div>
+      <div class="col"><h4>Markdown — the brief that builds it</h4><ul><li>Shape the <b class="hl">scope and content</b> in a chat or a project — argue it out, get it right.</li><li>Then have Claude write it as a clean <b class="hl">.md brief</b>: compact, structured, token-light.</li><li>That brief is what you hand to <b class="hl">Claude Design</b> to build the artifact — fast, no re-explaining.</li></ul></div>
+    </div>
+    <div class="strip fadein d2"><div class="st">⛳ The pro move</div><p>Think in chat, decide in a project, then output a tight <b class="hl">.md brief</b> — the scope and the content. Hand that to Claude Design and it builds the piece. The brief is the bridge from idea to artifact.</p></div>
+    <div class="btnrow"><button class="lnk back" data-goto="PRO1">The ladder</button><button class="btn-primary" data-goto="PRO3">On-brand by default <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- PRO3 · on-brand by default -->
+<section class="node node--photo" id="PRO3" data-branch="pro">
+  <div class="bg ov-prod" style="background-image:url('assets/img/studio-driver.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Going Pro · 2 · on-brand by default</div>
+    <h2 class="h">DESIGN THAT LOOKS LIKE US</h2>
+    <p class="lead" style="margin-top:12px">Hand <b class="hl">Claude Design</b> your <b class="hl">.md brief</b> and it turns it into polished visuals — decks, one-pagers, mockups — exporting to PowerPoint, PDF, or Canva for the team to finish. You bring the scope; it brings the craft.</p>
+    <div class="two-col fadein d1" style="margin-top:14px">
+      <div class="col"><h4>On-brand, automatically</h4><ul><li>Brand isn't a guess — the <b class="hl">TaylorMade brand-guide skill</b> already holds our voice, colors, type, and logo rules, so design starts on-brand, not generic.</li><li>Comment on any element, nudge spacing or color, and it applies the fix across the whole piece.</li><li>For photoreal product imagery, still reach for <b style="color:#fff">Gemini Enterprise or Adobe Firefly</b> — those generate images; Claude Design lays out the design.</li></ul></div>
+      <div class="col"><h4>Build once, share with the team</h4><ul><li>A strong prompt, project, or design system is worth far more shared than hoarded.</li><li>Package the repeatable ones as <b class="hl">skills</b> — the brand guide itself can be a skill every region runs.</li><li>The multiplier: <b class="hl">one person builds it, the whole team plays better.</b></li></ul></div>
+    </div>
+    <small class="note">Claude Design is in <b>beta</b> (Pro · Max · Team · Enterprise) and <b>default-off for Enterprise</b> — IT flips it on, then sets up our design system once so everything inherits TaylorMade's colors, type, and components. For finished, photoreal marketing imagery, the approved tools stay <b>Gemini Enterprise &amp; Adobe Firefly</b>.</small>
+    <div class="btnrow"><button class="lnk back" data-goto="PRO2">Back</button><button class="btn-primary" data-goto="PRO4">Trust, but verify <span class="ar">▶</span></button></div>
+    <div class="sources"><div class="sh"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verified · go deeper</div><div class="srcgrid"><a class="src" href="https://www.anthropic.com/news/claude-design-anthropic-labs" target="_blank" rel="noopener">Claude Design <span class="dom">anthropic.com</span></a><a class="src" href="https://support.claude.com/en/articles/14604416-get-started-with-claude-design" target="_blank" rel="noopener">Get started <span class="dom">support.claude.com</span></a></div></div>
+  </div>
+</section>
+
+<!-- PRO4 · trust but verify -->
+<section class="node node--photo" id="PRO4" data-branch="pro">
+  <div class="bg ov-prod" style="background-image:url('assets/img/close-grass.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">Going Pro · 3 · trust, but verify</div>
+    <h2 class="h">SIGN YOUR OWN SCORECARD</h2>
+    <p class="lead" style="margin-top:12px">In golf you sign your own card — get it wrong and it's on you. Same here: Claude gets you 80% of the way fast, but <b class="hl">you're the player of record.</b> Pros build the check into the routine.</p>
+    <div class="cards g3" style="margin-top:14px">
+      <div class="card-i d1 fadein"><div class="tier">make it show its work</div><h4>Ask for sources</h4><p>"Where did each number come from?" "Cite the doc and the line." If it can't point to a source, treat it as a draft, not a fact.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">pressure-test it</div><h4>Have it check itself</h4><p>"Argue the other side." "What would a skeptic challenge?" "What did you assume?" A second pass catches what a first draft misses.</p></div>
+      <div class="card-i d3 fadein"><div class="tier">you sign it</div><h4>Own the last 20%</h4><p>Numbers, names, claims, brand voice — your judgment is the value. Never forward what you haven't read.</p></div>
+    </div>
+    <div class="strip fadein d2"><div class="st">⛳ The bar</div><p>Before it leaves your hands: <b class="hl">would this run in front of leadership, unedited?</b> If not, take one more swing. Accuracy is the whole game.</p></div>
+    <div class="btnrow"><button class="lnk back" data-goto="PRO1">The ladder</button><button class="btn-primary" data-goto="SCRAMBLE">To the contest <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- ============================================================ SCRAMBLE ============================================================ -->
+<section class="node node--photo" id="SCRAMBLE" data-branch="scramble">
+  <div class="bg ov-86" style="background-image:url('assets/img/di_contest.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The contest · closest to the pin</div>
+    <h2 class="h">CLOSEST TO THE PIN</h2>
+    <p class="lead" style="margin-top:12px">Three scenarios, no templates. <b class="hl">You write the prompt yourself</b> — your role, your market, your call — using the Pre-Shot Routine and your memory. Pick <b class="hl">one</b>, make it yours, then a 30-second present and the room votes.</p>
+    <div class="cards g3" style="margin-top:16px">
+      <div class="card-i d1 fadein"><div class="tier">Scenario 1 · a plan</div><h4>Masters Monday</h4><p>It's Masters week and <b class="hl">Scottie just put the Qi4D in the bag</b> — biggest stage in golf, our newest driver, the world watching. What does <b class="hl">your</b> market do? Get Claude to build the plan.</p></div>
+      <div class="card-i d2 fadein"><div class="tier">Scenario 2 · an image</div><h4>The Headcover</h4><p>Design a <b class="hl">new headcover</b> to rally behind an upcoming event in your market — then bring it to life in <b class="hl">Gemini Enterprise</b> or <b class="hl">Adobe Firefly</b>.</p></div>
+      <div class="card-i d3 fadein"><div class="tier">Scenario 3 · the real moment</div><h4>Back-to-Back</h4><p>April 2026: <b class="hl">Rory wins the Masters two years running</b> — a TaylorMade Spider on the greens, the world watching TM. How does <b class="hl">your</b> market ride it?</p></div>
+    </div>
+    <div class="two-col fadein d4">
+      <div class="col">
+        <h4>How it plays · ~15 min</h4>
+        <ul>
+          <li><b style="color:#fff">0–10 min</b> — pick a scenario, write your own prompt, iterate once.</li>
+          <li><b style="color:#fff">10 min</b> — lock what you made and submit it.</li>
+          <li><b style="color:#fff">then</b> — 30-second presents, and the room votes.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>How it's judged</h4>
+        <ul>
+          <li>One vote each — you <b style="color:#fff">can't vote for your own region</b>.</li>
+          <li>The bar: could this go live tomorrow?</li>
+          <li>Most votes wins closest to the pin. Ties play off.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="submitp fadein d4">
+      <span class="qrwrap"><img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=800x800&amp;margin=10&amp;ecc=H&amp;data=https%3A%2F%2Fforms.monday.com%2Fforms%2Fbb491a7a9729b39e0d3bb91210f5f7ae" alt="Scan to submit your shot"><span class="qrlogo"><img src="assets/logo/metal-t.png" alt=""></span></span>
+      <div class="qrph">forms.monday.com · Closest to the Pin</div>
+      <div>
+        <div class="sp-t">⛳ Scan to drop your shot</div>
+        <div class="sp-d">Scan → pick your scenario, paste your prompt, attach your image, submit. We reveal them on the big board and the room votes. <a class="submit-link" target="_blank" rel="noopener">[set SUBMIT_URL]</a></div>
+      </div>
+    </div>
+    <div class="btnrow"><button class="scorebtn" data-goto="BOARD" style="height:40px">⛳ Open the live board</button><button class="btn-primary" data-goto="CLUB">To the 19th <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- ============================================================ LIVE BOARD (embedded — runs inside the deck) ============================================================ -->
+<section class="node" id="BOARD" data-branch="scramble">
+  <iframe class="boardframe" src="Closest to the Pin - Board.html" title="Closest to the Pin — live board"></iframe>
+</section>
+
+<!-- ============================================================ 19TH HOLE ============================================================ -->
+<section class="node node--photo" id="CLUB" data-branch="club">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_19th.jpg')"></div>
+  <div class="wrap">
+    <div class="eyebrow">The 19th Hole · sign the card</div>
+    <h2 class="h">SIGN YOUR SCORECARD</h2>
+    <p class="lead" style="margin-top:14px">That's the round — your toolkit, the pre-shot routine, your function's holes, going pro, and closest to the pin. Here's the scorecard to take with you.</p>
+    <div class="strip fadein d1"><div class="st">⛳ First — turn on your two new skills</div><p>Two skills are shared with you: <b class="hl">/smart-morning-briefing</b> (your daily command center — mail, calendar, tasks) and <b class="hl">/taylormade-brand-guide</b> (the brand on tap — voice, color, type). <b style="color:#fff">Open Customize → enable both → put them to work.</b> <span style="color:var(--muted);font-size:13px">(Don't see them yet? Restart Claude desktop or open claude.ai.)</span></p></div>
+    <div class="two-col">
+      <div class="col fadein d2">
+        <h4>Lead by example</h4>
+        <ul>
+          <li>You set the tone — <b class="hl" style="color:#fff">use AI in your own daily work</b>, visibly, and your team follows.</li>
+          <li>Fold it into the routine: briefs, recaps, research, first drafts — every day, not someday.</li>
+          <li>Share one AI win a month in the team channel so the wins compound.</li>
+          <li>Be the first call when a teammate gets stuck.</li>
+        </ul>
+      </div>
+      <div class="col fadein d3">
+        <h4>Your Monday move</h4>
+        <ul>
+          <li>Set your <b class="hl" style="color:#fff">memory</b> once — the five-minute chat so Claude always knows your role, region, and voice.</li>
+          <li>Pick <b class="hl" style="color:#fff">one real piece of work</b> and run the Pre-Shot Routine on it; take one mulligan.</li>
+          <li>That's the whole habit. One use case, one person, one week.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="weeks fadein d4" style="margin-top:22px">
+      <div class="week"><div class="wk">Week 1</div><h4>Run one real task</h4><p>Use a starter from today on live work. Save the chat.</p></div>
+      <div class="week"><div class="wk">Week 2</div><h4>Build a Project</h4><p>"[Region] Marketing Hub 2027" — upload brand guides, briefs, specs.</p></div>
+      <div class="week"><div class="wk">Week 3</div><h4>Bring your team in</h4><p>Share one Project output. Teach one teammate one prompt.</p></div>
+      <div class="week"><div class="wk">Week 4</div><h4>Report a win</h4><p>Post it in the team channel — shared wins compound.</p></div>
+    </div>
+    <div class="strip fadein d4"><div class="st">Your support &amp; home base</div><p>Everything in one place — approved tools, how to access them, and the AI policy — at <b class="hl">aiuseguide.tmgolf.biz</b>. Ali Chitsaz runs ongoing AI support &amp; content (<b class="hl">ali.chitsaz@taylormadegolf.com</b>); IT &amp; governance route to FreshService.</p></div>
+    <div class="btnrow"><button class="btn-primary" data-goto="FIRST10">Your first 10 minutes <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- FIRST10 · your first 10 minutes + home base -->
+<section class="node node--photo" id="FIRST10" data-branch="club">
+  <div class="bg ov-prod" style="background-image:url('assets/img/di_19th.jpg')"></div>
+  <style>
+    #FIRST10 .f10{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:start;margin-top:16px}
+    #FIRST10 .steps{display:flex;flex-direction:column;gap:9px}
+    #FIRST10 .step{display:flex;gap:13px;align-items:flex-start}
+    #FIRST10 .step + .step{border-top:1px solid var(--line);padding-top:9px}
+    #FIRST10 .step .mn{flex:0 0 auto;width:64px;font-weight:800;color:var(--red);font-size:13px;letter-spacing:.03em;padding-top:2px}
+    #FIRST10 .step h4{font-size:14px;color:#fff;margin:0 0 2px;text-transform:uppercase;letter-spacing:.02em}
+    #FIRST10 .step p{font-size:12.5px;color:var(--dim);margin:0;line-height:1.34}
+    #FIRST10 .hb{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+    #FIRST10 .hb-bar{background:#0c0c0c;padding:11px 14px;display:flex;align-items:center;gap:9px;border-bottom:2px solid var(--red)}
+    #FIRST10 .hb-bar b{font-size:12px;letter-spacing:.06em;color:#fff;font-weight:800}
+    #FIRST10 .hb-bar .t{margin-left:auto;font-size:9.5px;color:#8a8a8a}
+    #FIRST10 .hb-body{padding:13px}
+    #FIRST10 .hb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    #FIRST10 .qa{background:#1a1a1a;border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+    #FIRST10 .qa .k{font-size:9px;letter-spacing:.07em;color:#8a8a8a;text-transform:uppercase}
+    #FIRST10 .qa .v{font-size:12px;color:#fff;font-weight:700;margin-top:2px}
+    #FIRST10 .hb-link{display:block;text-align:center;margin-top:11px;font-size:12.5px;color:#fff;font-weight:800;background:var(--red);border-radius:5px;padding:9px}
+  </style>
+  <div class="wrap">
+    <div class="eyebrow">The 19th · take it with you</div>
+    <h2 class="h">YOUR FIRST 10 MINUTES</h2>
+    <p class="lead" style="margin-top:10px">Don't let today fade. This is the on-ramp — ten minutes, this week, and you've shipped one real thing.</p>
+    <div class="f10">
+      <div class="steps">
+        <div class="step"><div class="mn">0–2 min</div><div><h4>Open &amp; sign in</h4><p>claude.ai or the desktop app → TaylorMade SSO.</p></div></div>
+        <div class="step"><div class="mn">2–4 min</div><div><h4>Switch on your skills</h4><p>Customize → enable <b class="hl" style="color:#fff">/smart-morning-briefing</b> and <b class="hl" style="color:#fff">/taylormade-brand-guide</b>.</p></div></div>
+        <div class="step"><div class="mn">4–6 min</div><div><h4>Set your memory</h4><p>Paste the five-minute setup so Claude knows your role, region, and voice.</p></div></div>
+        <div class="step"><div class="mn">6–10 min</div><div><h4>Run one real task</h4><p>Pick live work — a recap, a brief, a competitive scan — and run the Pre-Shot Routine. Take one mulligan.</p></div></div>
+      </div>
+      <div>
+        <p class="lead" style="font-size:12.5px;margin:0 0 9px;color:var(--dim)">Your home base after today — every approved tool, how to reach it, and the AI policy, in one place:</p>
+        <a class="hb" href="https://aiuseguide.tmgolf.biz/" target="_blank" rel="noopener">
+          <div class="hb-bar"><img src="assets/logo/metal-t.png" alt="" style="height:13px"><b>AI TOOLS AT TAYLORMADE</b><span class="t">aiuseguide.tmgolf.biz</span></div>
+          <div class="hb-body">
+            <div class="hb-grid">
+              <div class="qa"><div class="k">Claude AI</div><div class="v">claude.ai</div></div>
+              <div class="qa"><div class="k">Copilot Chat</div><div class="v">copilot.microsoft.com</div></div>
+              <div class="qa"><div class="k">IT Service Portal</div><div class="v">tmgolf.freshservice.com</div></div>
+              <div class="qa"><div class="k">Request a new AI tool</div><div class="v">Submit a request</div></div>
+            </div>
+            <span class="hb-link">Open the AI Tools Guide →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="btnrow"><button class="btn-primary" data-goto="CLOSE">Finish the round <span class="ar">▶</span></button></div>
+  </div>
+</section>
+
+<!-- ============ CLOSE ============ -->
+<section class="node node--photo" id="CLOSE" data-branch="club">
+  <div class="bg ov-86" style="background-image:url('assets/img/di_close.jpg')"></div>
+  <div class="wrap">
+    <img class="z-metal" src="assets/logo/metal-t.png" alt="TaylorMade">
+    <div class="z-tag">THIS IS THE<br><span style="color:var(--red)">STARTING LINE.</span></div>
+    <div class="z-rule"></div>
+    <p class="z-sub">This wasn't a training event. It was the first tee. The marketing team that adopts AI first will be faster, more consistent, and better equipped to win in every market. Go play your round.</p>
+    <div class="z-credit">TAYLORMADE GOLF &nbsp;·&nbsp; WORLD MARKETING SUMMIT &nbsp;·&nbsp; BUILT IN CLAUDE BY ALI CHITSAZ</div>
+    <div class="btnrow" style="justify-content:center"><button class="lnk" data-goto="COURSE">↺ Back to the course</button><button class="lnk" data-home>Start the round over</button></div>
+  </div>
+</section>
+
+<div id="lbWrap">
+  <div id="lbPanel">
+    <div class="lb-head">
+      <div class="lb-title"><span class="fl">⛳</span>CLOSEST TO THE PIN</div>
+      <button class="lb-x" id="lbClose" title="Close (Esc)">✕</button>
+    </div>
+    <div class="lb-sub">Most votes wins. Tap <b style="color:var(--red)">＋</b> as hands go up — or click a number to set your form totals. Double-click a name to rename.</div>
+    <div class="submitp">
+      <span class="qrwrap"><img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=800x800&amp;margin=10&amp;ecc=H&amp;data=https%3A%2F%2Fforms.monday.com%2Fforms%2Fbb491a7a9729b39e0d3bb91210f5f7ae" alt="Scan to submit your shot"><span class="qrlogo"><img src="assets/logo/metal-t.png" alt=""></span></span>
+      <div class="qrph">forms.monday.com · Closest to the Pin</div>
+      <div><div class="sp-t">⛳ Drop your shot</div><div class="sp-d">Scan to open the submission form. <a class="submit-link" target="_blank" rel="noopener">[set SUBMIT_URL]</a></div></div>
+    </div>
+    <div class="lb-rows" id="lbRows"></div>
+    <div class="lb-foot">
+      <button class="lb-mini" id="lbUndo">↺ Undo last</button>
+      <button class="lb-mini" id="lbAddTeam">+ Add region</button>
+      <button class="lb-mini" id="lbReset">Reset votes</button>
+    </div>
+    <div class="lb-note">One vote per person; you can't vote for your own region. The bar is simple — would this post run in your feed, unedited? Names and roster are yours to set on the day.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* ===== SUBMIT & VOTE — monday forms + a branded big-screen board =====
+     Submit form: forms.monday.com/forms/bb491a7a9729b39e0d3bb91210f5f7ae  (board 18418880107)
+     Vote (live):  ctp-proxy.ali-chitsaz.workers.dev/vote  → records to Votes board 18418881836
+     Big screen:  Closest to the Pin - Board.html  (regenerated from monday at reveal time)
+     SUBMIT_URL = the submit form (QR + scan-to-submit). BOARD_PAGE = the big-screen board. */
+  var SUBMIT_URL = "https://forms.monday.com/forms/bb491a7a9729b39e0d3bb91210f5f7ae";
+  var BOARD_PAGE = "Closest to the Pin - Board.html";
+  /* ---------- NODE / BRANCH MODEL ---------- */
+  const NODES={};
+  document.querySelectorAll('section.node').forEach(n=>NODES[n.id]=n);
+  const BRANCHES={
+    tee:     {label:'The Tee',    nodes:['AGENDA','TEE','RULES'],         entry:'AGENDA',  icon:'<path d="M12 3v11"/><path d="M12 4l7 2.5L12 9"/><path d="M7 21h10"/>'},
+    bag:     {label:'The Bag',    nodes:['ACCESS','ANATOMY','BAG1','BAG2','BAG3','BAG4'], entry:'ACCESS',    icon:'<path d="M8.5 8h7l1 12h-9z"/><path d="M9.5 8V5.5a2.5 2.5 0 0 1 5 0V8"/><path d="M16.5 11H18v5h-1.5"/>'},
+    range:   {label:'The Range',  nodes:['ROUTINE','RANGE'],              entry:'ROUTINE', icon:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'},
+    course:  {label:'The Course',  nodes:['COURSE','DEMO1','DEMO2','DEMO3'],entry:'COURSE', icon:'<path d="M7 21V4l9 2.6L7 9.5"/><path d="M4 21h9"/>'},
+    pro:     {label:'Going Pro',  nodes:['PRO1','PRO2','PRO3','PRO4'],    entry:'PRO1',    icon:'<path d="M4 20l5-6 4 4 7-9"/><path d="M15 9h3v3"/><path d="M4 20h16"/>'},
+    scramble:{label:'The Pin',    nodes:['SCRAMBLE','BOARD'],            entry:'SCRAMBLE',icon:'<circle cx="8.5" cy="19.5" r="1.8"/><path d="M8.5 17.7V4l9 3-9 3"/>'},
+    club:    {label:'19th Hole',  nodes:['CLUB','FIRST10','CLOSE'], entry:'CLUB',    icon:'<path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M5 4h2M17 4h2M9.5 13h5M12 12v5M9 20h6"/>'}
+  };
+  const ORDER=['T','AGENDA','TEE','RULES','ACCESS','ANATOMY','BAG1','BAG2','BAG3','BAG4','ROUTINE','RANGE','COURSE','DEMO1','DEMO2','DEMO3','PRO1','PRO2','PRO3','PRO4','SCRAMBLE','BOARD','CLUB','FIRST10','CLOSE'];
+  let current=null; const history=[]; const visited=new Set();
+
+  /* ---------- branch rail ---------- */
+  const rail=document.getElementById('brandrail');
+  Object.entries(BRANCHES).forEach(([k,b])=>{
+    const el=document.createElement('button'); el.className='rail-dot'; el.dataset.branch=k;
+    el.innerHTML='<svg viewBox="0 0 24 24">'+b.icon+'</svg><span class="rl">'+b.label+'</span>';
+    el.addEventListener('click',()=>go(b.entry));
+    rail.appendChild(el);
+  });
+
+  function renderSubmit(){
+    if(!SUBMIT_URL) return;
+    document.querySelectorAll('a.submit-link').forEach(function(a){ a.href=SUBMIT_URL; a.textContent=SUBMIT_URL.replace(/^https?:\/\//,''); });
+  }
+  // ---- fit any node's content to the 16:9 viewport (no scrolling) ----
+  function fitNode(node){
+    if(!node) return;
+    var wrap=node.querySelector('.wrap'); if(!wrap) return;
+    wrap.style.transform=''; wrap.style.transformOrigin='center center';
+    var cs=getComputedStyle(node);
+    var avail=node.clientHeight - parseFloat(cs.paddingTop||0) - parseFloat(cs.paddingBottom||0);
+    var h=wrap.scrollHeight;
+    if(h>avail && h>0){ wrap.style.transform='scale('+Math.max(0.5, avail/h).toFixed(4)+')'; }
+  }
+  var _rt; window.addEventListener('resize',function(){ clearTimeout(_rt); _rt=setTimeout(function(){ if(current&&NODES[current]) fitNode(NODES[current]); },120); });
+  function go(id, push){
+    if(push===undefined) push=true;
+    if(!NODES[id]||id===current) return;
+    const prev=NODES[current];
+    if(prev){ prev.classList.remove('active'); prev.classList.add('leaving'); setTimeout(()=>prev.classList.remove('leaving'),600); }
+    if(push && current) history.push(current);
+    current=id; const node=NODES[id];
+    node.querySelectorAll('.fn.open').forEach(f=>f.classList.remove('open'));
+    node.scrollTop=0; node.classList.add('active'); requestAnimationFrame(function(){fitNode(node);});
+    const br=node.dataset.branch; if(BRANCHES[br]) visited.add(br);
+    if(id==='CLUB') renderBigboard();
+    updateChrome();
+  }
+  function back(){ if(history.length){ go(history.pop(), false); } }
+  function menu(){ go('COURSE'); }
+  function reset(){ history.length=0; visited.clear(); go('T', false); }
+  function next(){ const i=ORDER.indexOf(current); if(i>-1 && i<ORDER.length-1) go(ORDER[i+1]); }
+  function prev(){ const i=ORDER.indexOf(current); if(i>0) go(ORDER[i-1]); }
+
+  function updateChrome(){
+    const node=NODES[current]; const br=node.dataset.branch;
+    const isTitle=(current==='T');
+    rail.style.opacity=isTitle?'0':'1'; rail.style.pointerEvents=isTitle?'none':'auto';
+    const wm=document.getElementById('wordmark'); const hideWm=(current==='T'||current==='CLOSE');
+    wm.style.opacity=hideWm?'0':'.92'; wm.style.pointerEvents=hideWm?'none':'auto';
+    document.getElementById('homeBtn').style.display=(current==='T')?'none':'inline-flex';
+    document.querySelectorAll('.rail-dot').forEach(d=>{
+      d.classList.toggle('cur', d.dataset.branch===br);
+      d.classList.toggle('done', visited.has(d.dataset.branch) && d.dataset.branch!==br);
+    });
+    const cr=document.getElementById('crumbs'); cr.innerHTML='';
+    const b=BRANCHES[br];
+    if(b){ b.nodes.forEach(nid=>{ const i=document.createElement('i'); i.className=(nid===current)?'on':(history.includes(nid)?'seen':''); cr.appendChild(i); }); }
+    document.getElementById('backBtn').disabled = history.length===0;
+    document.getElementById('kbdHint').style.opacity = (current==='T'||current==='COURSE')?'.85':'0';
+    const ei=ORDER.indexOf(current);
+    document.getElementById('edgePrev').classList.toggle('hide', ei<=0);
+    document.getElementById('edgeNext').classList.toggle('hide', ei>=ORDER.length-1);
+  }
+
+  /* ---------- delegated clicks ---------- */
+  document.addEventListener('click',function(e){
+    if(e.target.closest('[data-home]')){ reset(); return; }
+    if(e.target.closest('[data-lb]')){ openLB(); return; }
+    const cp=e.target.closest('[data-copy]'); if(cp){ doCopy(cp); return; }
+    const g=e.target.closest('[data-goto]'); if(g){ go(g.dataset.goto); return; }
+    const pb=e.target.closest('.poll-bar'); if(pb){ const row=pb.closest('.poll-row'); tally(+row.dataset.poll); return; }
+    const fn=e.target.closest('.fn'); if(fn && !e.target.closest('.prompt') && NODES[current] && NODES[current].contains(fn)){ fn.classList.toggle('open'); requestAnimationFrame(function(){fitNode(NODES[current]);}); }
+  });
+  document.getElementById('wordmark').addEventListener('click',function(){ go('AGENDA'); });
+  document.getElementById('backBtn').addEventListener('click',back);
+  document.getElementById('menuBtn').addEventListener('click',menu);
+  document.getElementById('homeBtn').addEventListener('click',reset);
+  document.getElementById('edgePrev').addEventListener('click',prev);
+  document.getElementById('edgeNext').addEventListener('click',next);
+  document.getElementById('scoreBtn').addEventListener('click',function(){go('BOARD');});
+
+  /* ---------- keyboard ---------- */
+  document.addEventListener('keydown',function(e){
+    if(document.activeElement && document.activeElement.isContentEditable) return;
+    if(document.getElementById('lbWrap').classList.contains('show')){ if(e.key==='Escape'||e.key==='l'||e.key==='L'){ closeLB(); } return; }
+    if(e.key==='Enter' && current==='T'){ next(); return; }
+    if(/^[1-6]$/.test(e.key)){ const btn=NODES[current].querySelector('[data-key="'+e.key+'"]'); if(btn){ btn.click(); e.preventDefault(); return; } }
+    if(e.key==='ArrowRight'){ e.preventDefault(); next(); return; }
+    if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); return; }
+    if(e.key==='Backspace'){ e.preventDefault(); back(); return; }
+    if(e.key==='Home'){ e.preventDefault(); reset(); return; }
+    if(e.key==='l'||e.key==='L'){ go('BOARD'); return; }
+    if(e.key==='s'||e.key==='S'){ menu(); return; }
+    if(e.key==='Escape'){ go('AGENDA'); } else if(e.key==='m'||e.key==='M'){ menu(); }
+  });
+
+  /* ---------- COPY TO CLIPBOARD (file:// safe) ---------- */
+  function doCopy(btn){
+    const block=btn.closest('.prompt'); const t=block.querySelector('.ptxt'); if(!t) return;
+    const text=t.textContent.trim();
+    const done=()=>{ const o=btn.innerHTML; btn.classList.add('done'); btn.innerHTML='✓ Copied'; setTimeout(()=>{btn.classList.remove('done'); btn.innerHTML=o;},1400); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+    } else { fallbackCopy(text,done); }
+  }
+  function fallbackCopy(text,done){
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(_){} document.body.removeChild(ta);
+  }
+
+  /* ---------- THE TEE · live poll ---------- */
+  const pollCounts=[0,0,0,0];
+  function tally(i){ pollCounts[i]++; renderPoll(); }
+  function renderPoll(){
+    const max=Math.max(1,...pollCounts);
+    document.querySelectorAll('#TEE .poll-row').forEach(row=>{
+      const i=+row.dataset.poll;
+      row.querySelector('.poll-fill').style.width=(pollCounts[i]/max*100)+'%';
+      row.querySelector('.pv').textContent=pollCounts[i];
+    });
+  }
+  document.getElementById('pollReset').addEventListener('click',()=>{ pollCounts.fill(0); renderPoll(); });
+
+  /* ---------- THE RANGE · distance meter ---------- */
+  const BASE=60, MAXY=320;
+  const FRAG={
+    role:'You are a senior brand marketer for TaylorMade Golf.',
+    context:"We're launching the Qi line in Japan this season — strong private-club play, precision-minded golfers, and Callaway pushing fitting bundles.",
+    task:'Draft 5 launch social captions.',
+    format:'One feature, one athlete, one lifestyle, one retailer, one story-hook — premium, confident voice.',
+    specifics:'Write them for LINE and reference our Japan tour player.'
+  };
+  const FRAGORDER=['role','context','task','format','specifics'];
+  const active={};
+  function rangeUpdate(){
+    let dist=BASE;
+    document.querySelectorAll('#RANGE .club').forEach(c=>{ if(c.classList.contains('on')) dist+=(+c.dataset.yd); });
+    dist=Math.min(dist,MAXY);
+    document.getElementById('rDist').innerHTML=dist+'<span class="yd">YDS</span>';
+    document.getElementById('rBall').style.left=Math.max(2,Math.min(96,(dist/MAXY*100)))+'%';
+    let v;
+    if(dist<120) v='Topped it. Vague in, vague out — Claude has nothing to aim at.';
+    else if(dist<200) v='Pop-up. Better — but still generic. Any brand could run this.';
+    else if(dist<280) v="Solid contact. Now it's usable — you're editing, not authoring.";
+    else v='Striped it. Fairway, pin-high — this is a pro prompt.';
+    document.getElementById('rVerdict').textContent=v;
+    // assemble prompt
+    const parts=FRAGORDER.filter(k=>active[k]).map(k=>'<b>'+FRAG[k]+'</b>');
+    const box=document.getElementById('rPromptTxt');
+    box.innerHTML = parts.length ? parts.join(' ') : '<em>Write some social posts.</em>';
+  }
+  document.querySelectorAll('#RANGE .club').forEach(c=>{
+    c.addEventListener('click',()=>{ c.classList.toggle('on'); active[c.dataset.add]=c.classList.contains('on'); rangeUpdate(); });
+  });
+
+  /* ---------- MODELS · EFFORT DIAL ---------- */
+  const MODELS=[
+    {n:'Haiku 4.5', tag:'fastest model',     base:20, cb:8},
+    {n:'Sonnet 4.6',tag:'balanced model',    base:40, cb:18},
+    {n:'Opus 4.8',  tag:'most capable model',base:62, cb:34}
+  ];
+  const EFFORT=[
+    {n:'LOW',   add:0,  mult:1.0},
+    {n:'MEDIUM',add:13, mult:1.8},
+    {n:'HIGH',  add:26, mult:2.7},
+    {n:'MAX',   add:40, mult:3.6}
+  ];
+  const USE=[
+    ["Instant answers — quick rewrites, classifications, simple lookups.","Fast, with a little more care — short drafts and tidy-ups.","Haiku pushed harder — still quick, a bit more reasoning.","Haiku's ceiling — usually better to step up to Sonnet instead."],
+    ["The default — fast, sharp, right for almost everything you do.","A touch more care on a draft or an analysis.","Deeper analysis and important deliverables, still efficient.","Sonnet's deepest thinking — thorough work without Opus-level cost."],
+    ["Opus's raw capability, fast — already strong on complex tasks.","Complex work with extra care.","Heavy lift — intricate reasoning for high-stakes deliverables.","The deepest, slowest setting — save it for the hardest, must-be-right calls."]
+  ];
+  const STOPS=[5,37,68,97];
+  const track=document.getElementById('track');
+  const modelSel=document.getElementById('modelSel');
+  var ddModel=1, ddEffort=0;
+  function ddRender(){
+    var m=MODELS[ddModel], e=EFFORT[ddEffort];
+    var depth=Math.min(100, m.base+e.add);
+    var cost=Math.min(100, Math.round(m.cb*e.mult));
+    var nm=document.getElementById('dlName'); if(nm) nm.innerHTML=m.n.toUpperCase()+' &middot; '+e.n+'<span class="api">'+m.tag+' &middot; '+e.n.toLowerCase()+' effort</span>';
+    var du=document.getElementById('dlUse'); if(du) du.textContent=USE[ddModel][ddEffort];
+    var tf=document.getElementById('trackFill'); if(tf) tf.style.width=STOPS[ddEffort]+'%';
+    var cb=document.getElementById('capBar'); if(cb) cb.style.width=depth+'%'; var cv=document.getElementById('capV'); if(cv) cv.textContent=depth+'%';
+    var ob=document.getElementById('costBar'); if(ob) ob.style.width=cost+'%'; var ov=document.getElementById('costV'); if(ov) ov.textContent=cost+'%';
+    if(track) track.querySelectorAll('.stop').forEach(function(s,idx){ s.classList.toggle('on',idx===ddEffort); s.classList.toggle('lit',idx<=ddEffort); });
+    if(modelSel) modelSel.querySelectorAll('.msb').forEach(function(b){ b.classList.toggle('on',+b.dataset.m===ddModel); });
+  }
+  if(modelSel){
+    modelSel.querySelectorAll('.msb').forEach(function(b){ b.addEventListener('click',function(){ ddModel=+b.dataset.m; ddRender(); }); });
+  }
+  if(track){
+    track.querySelectorAll('.stop').forEach(function(s){ s.addEventListener('click',function(){ ddEffort=+s.dataset.i; ddRender(); }); });
+    var nearest=function(cx){ var r=track.getBoundingClientRect(); var p=(cx-r.left)/r.width*100; var b=0,bd=1e9; STOPS.forEach(function(sp,idx){var d=Math.abs(sp-p); if(d<bd){bd=d;b=idx;}}); return b; };
+    var ddrag=false;
+    track.addEventListener('pointerdown',function(e){ddrag=true; ddEffort=nearest(e.clientX); ddRender(); try{track.setPointerCapture(e.pointerId);}catch(_){}});
+    track.addEventListener('pointermove',function(e){ if(ddrag){ ddEffort=nearest(e.clientX); ddRender(); } });
+    window.addEventListener('pointerup',function(){ddrag=false;});
+  }
+  if(track||modelSel) ddRender();
+
+  /* ---------- LEADERBOARD ---------- */
+  let teams=[{name:'Europe',votes:0},{name:'Japan',votes:0},{name:'Korea',votes:0},{name:'Canada',votes:0},{name:'LATAM',votes:0},{name:'Australia',votes:0}];
+  const vHist=[];
+  try{ const s=localStorage.getItem('diMktCTP2'); if(s){ const p=JSON.parse(s); if(Array.isArray(p)&&p.length&&p.every(t=>typeof t.votes==='number')){ teams=p; } } }catch(_){}
+  function saveTeams(){ try{ localStorage.setItem('diMktCTP2',JSON.stringify(teams)); }catch(_){} }
+  function leaderIdx(){ let li=-1,lv=-1; teams.forEach((t,i)=>{ if(t.votes>lv){lv=t.votes;li=i;} }); return (teams.some(t=>t.votes>0))?li:-1; }
+  function vote(idx,d){ teams[idx].votes=Math.max(0,teams[idx].votes+d); if(d!==0) vHist.push({i:idx,d:d}); saveTeams(); renderRows(); renderBigboard(); }
+
+  function renderRows(){
+    const rows=document.getElementById('lbRows'); rows.innerHTML='';
+    const li=leaderIdx();
+    const order=teams.map((t,i)=>i).sort((a,b)=>teams[b].votes-teams[a].votes || a-b);
+    order.forEach((idx,pos)=>{
+      const t=teams[idx];
+      const row=document.createElement('div'); row.className='lb-row'+(idx===li?' lead':'');
+      row.innerHTML='<div class="pos">'+(pos+1)+'</div>'+
+        '<div class="scoreline" style="justify-content:flex-start;gap:8px">'+(idx===li?'<span class="fl">⛳</span>':'')+'<span class="team" data-idx="'+idx+'">'+t.name+'</span></div>'+
+        '<div class="vwrap"><button class="vbtn" data-d="-1">–</button><span class="score '+(t.votes>0?'under':'even')+'" title="Click to set exactly">'+t.votes+'</span><button class="vbtn add" data-d="1">＋</button></div>';
+      const teamEl=row.querySelector('.team');
+      teamEl.addEventListener('dblclick',e=>{ e.stopPropagation(); teamEl.contentEditable=true; teamEl.focus();
+        const r=document.createRange(); r.selectNodeContents(teamEl); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); });
+      teamEl.addEventListener('blur',()=>{ teamEl.contentEditable=false; const v=teamEl.textContent.trim()||t.name; teams[idx].name=v; saveTeams(); renderRows(); updateLeadChip(); renderBigboard(); });
+      teamEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); teamEl.blur(); } });
+      row.querySelectorAll('.vbtn').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); vote(idx,+b.dataset.d); }));
+      row.querySelector('.score').addEventListener('click',e=>{ e.stopPropagation(); const n=prompt('Set votes for '+t.name+':', t.votes); if(n!==null && !isNaN(parseInt(n,10))){ teams[idx].votes=Math.max(0,Math.round(+n)); vHist.push({i:idx,d:0}); saveTeams(); renderRows(); renderBigboard(); } });
+      rows.appendChild(row);
+    });
+    updateLeadChip();
+  }
+  function updateLeadChip(){
+    const li=leaderIdx(); const chip=document.getElementById('leadTeam');
+    chip.textContent = li<0 ? '' : ' · '+teams[li].name.toUpperCase()+' '+teams[li].votes;
+  }
+  function renderBigboard(){
+    const bb=document.getElementById('bigboard'); if(!bb) return; bb.innerHTML='';
+    const li=leaderIdx();
+    const order=teams.map((t,i)=>i).sort((a,b)=>teams[b].votes-teams[a].votes || a-b);
+    order.forEach((idx,pos)=>{ const t=teams[idx];
+      const r=document.createElement('div'); r.className='bb-row'+(idx===li?' lead':'');
+      r.innerHTML='<div class="bb-pos">'+(pos+1)+'</div><div class="bb-team">'+(idx===li?'⛳ ':'')+t.name+'</div><div class="bb-score '+(t.votes>0?'under':'even')+'">'+t.votes+(t.votes===1?' vote':' votes')+'</div>';
+      bb.appendChild(r);
+    });
+  }
+  function openLB(){ document.getElementById('lbWrap').classList.add('show'); renderRows(); }
+  function closeLB(){ document.getElementById('lbWrap').classList.remove('show'); }
+  document.getElementById('lbClose').addEventListener('click',closeLB);
+  document.getElementById('lbWrap').addEventListener('click',e=>{ if(e.target.id==='lbWrap') closeLB(); });
+  document.getElementById('lbUndo').addEventListener('click',()=>{ const h=vHist.pop(); if(h && h.d!==0){ teams[h.i].votes=Math.max(0,teams[h.i].votes-h.d); saveTeams(); renderRows(); renderBigboard(); } });
+  document.getElementById('lbReset').addEventListener('click',()=>{ teams.forEach(t=>t.votes=0); vHist.length=0; saveTeams(); renderRows(); renderBigboard(); });
+  document.getElementById('lbAddTeam').addEventListener('click',()=>{ const n=prompt('Region / team name:'); if(n&&n.trim()){ teams.push({name:n.trim(),votes:0}); saveTeams(); renderRows(); renderBigboard(); } });
+
+  /* ---------- Metal-T watermark on solid nodes ---------- */
+  document.querySelectorAll('.node:not(.node--photo)').forEach(function(n){
+    var w=document.createElement('img'); w.src='assets/logo/metal-t.png'; w.alt=''; w.className='watermark'; w.setAttribute('aria-hidden','true');
+    n.insertBefore(w, n.firstChild);
+  });
+
+  /* ---------- init ---------- */
+  current='T'; NODES.T.classList.add('active'); updateChrome(); renderPoll(); rangeUpdate(); renderBigboard(); requestAnimationFrame(function(){fitNode(NODES.T);}); renderSubmit();
+})();
+</script>
+
+</body>
+</html>
