@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Closest to the Pin — Facilitator Run Sheet</title>
+<style>
+  :root{
+    --red:#E2001A; --ink:#111; --paper:#fff; --muted:#6b6b6b; --line:#e3e3e3; --soft:#f7f7f7;
+    --din:"DIN Next 79","DIN Next LT Pro","DIN Next","DIN Alternate","Bahnschrift","Arial Narrow",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#cfcfcf;font-family:var(--din);color:var(--ink);-webkit-font-smoothing:antialiased;padding:26px;line-height:1.4}
+  .toolbar{max-width:820px;margin:0 auto 16px;display:flex;gap:10px;align-items:center;justify-content:flex-end}
+  .toolbar button{font-family:var(--din);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:11px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:9px 15px;border-radius:2px;cursor:pointer}
+  .toolbar .note{margin-right:auto;color:#444;font-size:12px;font-weight:600}
+
+  .page{max-width:820px;margin:0 auto;background:var(--paper);padding:44px 50px 38px;box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  .kick{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+  .kick b{color:var(--ink)}
+  .redbar{height:10px;width:48px;background:var(--red);margin:16px 0 12px}
+  h1{font-size:38px;line-height:.96;font-weight:800;letter-spacing:-.01em;text-transform:uppercase}
+  h1 .r{color:var(--red)}
+  .lede{margin-top:11px;font-size:15px;font-weight:600;color:#333;max-width:72ch}
+
+  h2{margin:30px 0 4px;font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:10px}
+  h2 .step{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;font-size:12px}
+  h2 .mins{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:none}
+  .rule{height:1px;background:var(--line);margin:8px 0 14px}
+
+  ol,ul{margin:0 0 0 2px;padding:0;list-style:none}
+  li{position:relative;padding:5px 0 5px 26px;font-size:14.5px;font-weight:500;color:#222}
+  li b{font-weight:800}
+  li .hl{color:var(--red);font-weight:800}
+  li::before{content:"";position:absolute;left:6px;top:13px;width:7px;height:7px;background:var(--red);border-radius:50%}
+  .sub{color:#666;font-size:13px;font-weight:600;margin:2px 0 6px 26px}
+  code{font-family:"Courier New",monospace;background:var(--soft);border:1px solid var(--line);border-radius:3px;padding:1px 6px;font-size:12.5px;color:#000}
+  .key{display:inline-block;border:1px solid var(--ink);border-radius:3px;padding:0 7px;font-weight:800;font-size:12px;background:#fff}
+
+  .say{background:var(--soft);border-left:3px solid var(--red);border-radius:4px;padding:14px 18px;margin-top:6px}
+  .say p{font-size:14px;color:#333;margin:6px 0;font-style:italic}
+  .say p b{font-style:normal;font-weight:800}
+
+  .foot{margin-top:26px;border-top:1px solid var(--line);padding-top:12px;font-size:10.5px;color:var(--muted);font-weight:600;line-height:1.5}
+
+  @media print{
+    body{background:#fff;padding:0}
+    .toolbar{display:none}
+    .page{box-shadow:none;max-width:none;margin:0;padding:34px 40px}
+    h2{break-after:avoid}
+    @page{size:letter;margin:13mm}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span class="note">Facilitator copy — print or keep on your laptop.</span>
+    <button onclick="window.print()">Print / Save PDF</button>
+  </div>
+
+  <div class="page">
+    <div class="kick"><b>TaylorMade</b> · World Marketing Summit · Day 3</div>
+    <div class="redbar"></div>
+    <h1>Closest to the Pin — <span class="r">Run Sheet</span></h1>
+    <div class="lede">Two branded <b>monday</b> forms feed a custom <b>big-screen board</b>: people submit a structured entry (prompt + image), then vote from their phones, and the whole room watches it resolve on a TaylorMade screen. Built, validated end-to-end, and wired into the deck.</div>
+
+    <h2><span class="step">A</span> The pieces (built &amp; ready) <span class="mins">no setup needed</span></h2>
+    <div class="rule"></div>
+    <ul>
+      <li><b>Submit form</b> — <code>forms.monday.com/forms/bb491a7a9729b39e0d3bb91210f5f7ae</code>. Guided fields: Name → Scenario → Your prompt → Upload image. TM-red, no login. Its QR is on the Submit Card and the deck's contest slide.</li>
+      <li><b>Big-screen board</b> — <code>Closest to the Pin - Board.html</code>. Full-screen, on-brand; shows every entry grouped by the three pins, with images. Keys: <span class="key">V</span> open voting · <span class="key">R</span> reveal winners · <span class="key">G</span> gallery · <span class="key">F</span> fullscreen.</li>
+      <li><b>Vote page (live)</b> — <code>ctp-proxy.ali-chitsaz.workers.dev/vote</code>. Lists the real entries; one tap per pin to vote. Its QR fills the board when you press <span class="key">V</span>.</li>
+    </ul>
+
+    <h2><span class="step">B</span> Submit <span class="mins">~8 min, during the contest</span></h2>
+    <div class="rule"></div>
+    <ul>
+      <li>Put the Submit Card on tables / show its QR. People <b>scan → pick scenario → paste prompt → (headcover) attach image → Submit.</b> Structured fields, no login.</li>
+      <li>Regionals can write their prompt in their own language — Claude handles JP / KO / ES, and it doubles as a live localization demo.</li>
+      <li>Each submission lands as a monday item with the prompt and the image together — that's what the board reads.</li>
+    </ul>
+
+    <h2><span class="step">C</span> Reveal &amp; vote <span class="mins">on the big screen</span></h2>
+    <div class="rule"></div>
+    <ul>
+      <li>The board <b>refreshes itself</b> — it pulls live from monday through the Cloudflare Worker every ~12 s and soft-updates in place (no reload, no flicker), so new shots and votes just appear. Nothing to keep open; the Worker runs on its own.</li>
+      <li>Open the board (<span class="key">L</span> in the deck, or the <b>⛳ Board</b> button). Walk each pin so the room sees the shots — read a couple of prompts aloud.</li>
+      <li>Press <span class="key">V</span> → the <b>Vote QR</b> fills the screen. The room scans it to open the live vote page, which already lists the real entries — one tap per pin. <span class="hl">Votes tally on the board in real time.</span></li>
+      <li>Press <span class="key">R</span> → <b>reveal</b>: the bars animate, the top shot in each pin is crowned. <span class="hl">Three champions.</span> Tie or a runaway? You're the rules official.</li>
+    </ul>
+    <div class="sub" style="margin-left:0">No pre-event setup — the board and vote page read live from monday through the Cloudflare Worker (always on). Voting is honor-system: one tap per pin, with a soft per-phone lock (no hard one-per-person without logins).</div>
+
+    <h2><span class="step">D</span> Say this</h2>
+    <div class="rule"></div>
+    <div class="say">
+      <p><b>Open:</b> “Three pins, three scenarios. You write the prompt — that's the whole game. Best shot in the room, judged by the room.”</p>
+      <p><b>Submit:</b> “Scan, pick your pin, paste your prompt, attach your image, submit. Ninety seconds.”</p>
+      <p><b>Vote:</b> “Everyone's shots are on the screen. Scan, pick your favorite in each pin. Vote for the shot, not your buddy.”</p>
+    </div>
+
+    <div class="foot">
+      Engine: monday.com forms + boards (submissions board 18418880107, votes board 18418881836), in the TaylorMade workspace. Big screen: a self-contained TaylorMade HTML page that reads those entries. Image links are monday signed URLs (valid ~1 hour) — the board is regenerated just before the reveal.
+    </div>
+  </div>
+</body>
+</html>
