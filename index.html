@@ -435,6 +435,20 @@ small.note{display:block; font-size:13px; color:var(--dim); line-height:1.5; mar
 #edgePrev{left:16px} #edgeNext{right:16px}
 .edge.hide{opacity:0; pointer-events:none; transform:translateY(-50%) scale(.85)}
 @media(max-width:760px){ .edge{width:34px; height:50px} #edgePrev{left:6px} #edgeNext{right:6px} }
+/* ---------- PHONE / TABLET (any orientation): scroll instead of shrink-to-fit — keeps ALL content & interactivity ---------- */
+@media(max-width:1024px),(max-height:620px){
+  .node{ justify-content:flex-start; }
+  .wrap{ transform:none !important; max-width:100%; }
+  #BOARD{ padding:62px 10px 78px; }
+}
+@media(max-width:600px){
+  .node{ padding:64px 15px 94px; }
+  h1.title{ font-size:clamp(44px,15vw,82px); }
+  h2.h{ font-size:clamp(24px,7.6vw,34px); }
+  .lead,.lead-lg{ font-size:15px; }
+  .btnrow{ gap:9px; }
+  .btnrow>.btn-primary,.btnrow>.btn-ghost,.choices .choice{ width:100%; justify-content:center; text-align:center; }
+}
 </style>
 </head>
 <body>
@@ -1056,7 +1070,7 @@ small.note{display:block; font-size:13px; color:var(--dim); line-height:1.5; mar
         <h4>How it plays · ~15 min</h4>
         <ul>
           <li><b style="color:#fff">0–10 min</b> — pick a scenario, write your own prompt, iterate once.</li>
-          <li><b style="color:#fff">10 min</b> — lock what you made and submit it.</li>
+          <li><b style="color:#fff">10 min</b> — screenshot or export your result as an image, then submit it.</li>
           <li><b style="color:#fff">then</b> — 30-second presents, and the room votes.</li>
         </ul>
       </div>
@@ -1074,7 +1088,7 @@ small.note{display:block; font-size:13px; color:var(--dim); line-height:1.5; mar
       <div class="qrph">forms.monday.com · Closest to the Pin</div>
       <div>
         <div class="sp-t">⛳ Scan to drop your shot</div>
-        <div class="sp-d">Scan → pick your scenario, paste your prompt, attach your image, submit. We reveal them on the big board and the room votes. <a class="submit-link" target="_blank" rel="noopener">[set SUBMIT_URL]</a></div>
+        <div class="sp-d">Scan → pick your scenario, paste your prompt, then <b class="hl">upload your result as an image</b> — screenshot it (Mac ⌘⇧4 · iPhone screenshot · Win ⊞+Shift+S) or export a PNG/JPG. We reveal them on the big board and the room votes. <a class="submit-link" target="_blank" rel="noopener">[set SUBMIT_URL]</a></div>
       </div>
     </div>
     <div class="btnrow"><button class="scorebtn" data-goto="BOARD" style="height:40px">⛳ Open the live board</button><button class="btn-primary" data-goto="CLUB">To the 19th <span class="ar">▶</span></button></div>
@@ -1255,6 +1269,7 @@ small.note{display:block; font-size:13px; color:var(--dim); line-height:1.5; mar
     if(!node) return;
     var wrap=node.querySelector('.wrap'); if(!wrap) return;
     wrap.style.transform=''; wrap.style.transformOrigin='center center';
+    if(window.innerWidth<=1024 || window.innerHeight<=620) return;  /* phone/tablet: let the slide scroll instead of shrinking to fit */
     var cs=getComputedStyle(node);
     var avail=node.clientHeight - parseFloat(cs.paddingTop||0) - parseFloat(cs.paddingBottom||0);
     var h=wrap.scrollHeight;
